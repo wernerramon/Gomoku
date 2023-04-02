@@ -29,6 +29,10 @@ private:
     GOM::IFont *m_font;
     GOM::IText *m_title;
     std::size_t m_flag;
+    Button m_local;
+    Button m_online;
+    Button m_settings;
+    Button m_exit;
 
     void initSprites();
     void initText();

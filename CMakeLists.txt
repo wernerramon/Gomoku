@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.6)
 project(gomoku)
 
 set(GOMOKU_HPP ./src/Components/Button.hpp 
-                ./src/Components/Sprite.hpp
                 ./src/Encapsulation/Event.hpp
                 ./src/Encapsulation/GraphicDataTypes.hpp
                 ./src/Encapsulation/IFont.hpp
@@ -28,7 +27,6 @@ set(GOMOKU_HPP ./src/Components/Button.hpp
                 ./src/States/MainState.hpp)
 
 set(GOMOKU_CPP ./src/Components/Button.cpp 
-                ./src/Components/Sprite.cpp
                 ./src/Encapsulation/SFML/Font.cpp
                 ./src/Encapsulation/SFML/GraphicLoader.cpp
                 ./src/Encapsulation/SFML/Mouse.cpp

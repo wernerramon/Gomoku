@@ -5,21 +5,13 @@
 #include <string>
 
 #include "../Encapsulation/GraphicDataTypes.hpp"
-#include "./Sprite.hpp"
+#include "../Encapsulation/ITexture.hpp"
+#include "../Encapsulation/ISprite.hpp"
+#include "../Encapsulation/IFont.hpp"
+#include "../Encapsulation/IText.hpp"
+#include "../Encapsulation/IGraphicLoader.hpp"
 
-#define GRAY               \
-    GOM::Color             \
-    {                      \
-        128, 128, 128, 255 \
-    }
-
-#define BLUE              \
-    GOM::Color            \
-    {                     \
-        18, 107, 165, 255 \
-    }
-
-class Button : public Sprite
+class Button
 {
 public:
     Button(std::string t_path, GOM::Vector2f t_pos,
@@ -27,9 +19,12 @@ public:
            bool t_is_white);
     bool is_pressed(GOM::Vector2f t_mouse_pos);
     bool is_hovered(GOM::Vector2f t_mouse_pos);
+    GOM::ISprite *getSprite() { return m_btn_sprite; };
 
 private:
     bool m_is_white;
+    GOM::ITexture *m_btn_texture;
+    GOM::ISprite *m_btn_sprite;
 };
 
 #endif // !BUTTON_HPP_

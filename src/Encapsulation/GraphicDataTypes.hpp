@@ -85,6 +85,8 @@ namespace GOM
     static const Color Magenta = {255, 0, 255, 255};
     static const Color Cyan = {0, 255, 255, 255};
     static const Color Transparent = {0, 0, 0, 0};
+    static const Color Grey = {128, 128, 128, 255};
+    static const Color EpiBlue = {18, 107, 165, 255};
 
     enum Style
     {
