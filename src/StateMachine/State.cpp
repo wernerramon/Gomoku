@@ -1,7 +1,7 @@
 #include "./State.hpp"
 
 State::State(StateMachine &t_machine, GOM::IRenderWindow *t_window,
-             GOM::IGraphicLoader *t_graphic_loader, const bool t_replace)
+             GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, const bool t_replace)
     : m_state_machine(t_machine), m_window(t_window), m_replace(t_replace)
 {
     m_graphic_loader = t_graphic_loader;

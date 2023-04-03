@@ -14,7 +14,7 @@ class State
 {
 public:
     State(StateMachine &t_machine, GOM::IRenderWindow *t_window,
-          GOM::IGraphicLoader *t_graphic_loader, const bool t_replace);
+          GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, const bool t_replace);
 
     virtual ~State() = default;
 

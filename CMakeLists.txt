@@ -24,7 +24,9 @@ set(GOMOKU_HPP ./src/Components/Button.hpp
                 ./src/StateMachine/Core.hpp
                 ./src/StateMachine/State.hpp
                 ./src/StateMachine/StateMachine.hpp
-                ./src/States/MainState.hpp)
+                ./src/States/GameState.hpp
+                ./src/States/MainState.hpp
+                ./src/States/ModeSelectLocal.hpp)
 
 set(GOMOKU_CPP ./src/Components/Button.cpp 
                 ./src/Encapsulation/SFML/Font.cpp
@@ -38,7 +40,9 @@ set(GOMOKU_CPP ./src/Components/Button.cpp
                 ./src/StateMachine/Core.cpp
                 ./src/StateMachine/State.cpp
                 ./src/StateMachine/StateMachine.cpp
+                ./src/States/GameState.cpp
                 ./src/States/MainState.cpp
+                ./src/States/ModeSelectLocal.cpp
                 ./src/main.cpp)
 
 include(FetchContent)

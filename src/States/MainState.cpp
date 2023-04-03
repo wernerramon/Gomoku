@@ -20,7 +20,6 @@ void MainState::initText()
 {
     float size_x = m_window->getSize().x;
     float size_y = m_window->getSize().y;
-
     m_font = m_graphic_loader->loadFont();
     if (!m_font->loadFromFile("./assets/font/Roboto/Roboto-Black.ttf"))
     {
@@ -36,8 +35,8 @@ void MainState::initText()
 }
 
 MainState::MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
-                     GOM::IGraphicLoader *t_graphic_loader, const bool t_replace)
-    : State(t_machine, t_window, t_graphic_loader, t_replace),
+                     GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, const bool t_replace)
+    : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
       m_local(Button("./assets/sprites/BTN/button_local.png",
                      GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 250),
                                    static_cast<float>(m_window->getSize().y / 2 + 150)},
@@ -55,6 +54,7 @@ MainState::MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
                                    static_cast<float>(m_window->getSize().y - 100)},
                      GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
+    m_size = t_size;
     initSprites();
     initText();
 }
@@ -84,6 +84,8 @@ void MainState::update()
             if (m_local.is_pressed(mouse_pos_f))
             {
                 std::cout << "local btn pressed" << std::endl;
+                m_next = StateMachine::build<ModeSelectLocal>(
+                    m_state_machine, m_window, m_graphic_loader, m_size, true);
             }
             if (m_online.is_pressed(mouse_pos_f))
             {
@@ -96,6 +98,7 @@ void MainState::update()
             if (m_exit.is_pressed(mouse_pos_f))
             {
                 std::cout << "exit btn pressed" << std::endl;
+                m_state_machine.quit();
             }
         }
 
