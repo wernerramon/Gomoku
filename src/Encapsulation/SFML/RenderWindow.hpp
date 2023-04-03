@@ -35,6 +35,7 @@ namespace GOM
     void create(unsigned int t_width, unsigned int t_height,
                 std::string t_title, GOM::Style t_style) override;
     bool pollEvent(GOM::Event &t_event) override;
+    void setSize(const GOM::Vector2u &t_size) override;
 
     sf::RenderWindow *getRenderWindow();
 

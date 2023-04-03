@@ -14,6 +14,7 @@
 #include "../StateMachine/StateMachine.hpp"
 
 #include "./ModeSelectLocal.hpp"
+#include "./SettingsState.hpp"
 
 class MainState final : public State
 {

@@ -2,6 +2,7 @@
 #define TEXT_HPP_
 
 #include <SFML/Graphics/Text.hpp>
+#include <iostream>
 
 #include "../IText.hpp"
 #include "./Font.hpp"
@@ -19,17 +20,19 @@ namespace GOM
     void setString(const std::string &string) override;
     void setCharacterSize(unsigned int size) override;
     void setColor(const GOM::Color &color) override;
-    const GOM::IFont *getFont() const override;
-    unsigned int getCharacterSize() const override;
+    const GOM::IFont *getFont() override;
+    unsigned int getCharacterSize() override;
     // const GOM::Color &getColor() const override;
     void setScale(const GOM::Vector2f &factor) override;
-    const GOM::Vector2f &getPosition() const override;
-    const std::string &getString() const override;
-    GOM::FloatRect getLocalBounds() const override;
+    const GOM::Vector2f &getPosition() override;
+    const std::string &getString() override;
+    GOM::FloatRect getLocalBounds() override;
     sf::Text &getText();
 
   private:
     sf::Text m_text;
+    GOM::Vector2f m_position;
+    std::string m_str;
   };
 } // namespace GOM
 

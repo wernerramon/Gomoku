@@ -30,6 +30,7 @@ namespace GOM
         virtual void create(unsigned int t_width, unsigned int t_height,
                             std::string t_title, GOM::Style t_style) = 0;
         virtual bool pollEvent(GOM::Event &t_event) = 0;
+        virtual void setSize(const GOM::Vector2u &t_size) = 0;
     };
 } // namespace GOM
 

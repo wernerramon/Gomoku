@@ -16,6 +16,14 @@ Button::Button(std::string t_path, GOM::Vector2f t_pos,
     float scale_y = t_target_size.y / m_btn_texture->getSize().y;
     m_btn_sprite->setScale({scale_x, scale_y});
     m_btn_sprite->setPosition(t_pos);
+    if (m_is_white)
+    {
+        m_btn_sprite->setColor(GOM::EpiBlue);
+    }
+    else
+    {
+        m_btn_sprite->setColor(GOM::White);
+    }
 }
 
 bool Button::is_hovered(GOM::Vector2f t_mouse_pos)

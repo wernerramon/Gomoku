@@ -23,17 +23,17 @@ void GOM::Text::setCharacterSize(unsigned int size)
 void GOM::Text::setColor(const GOM::Color &color)
 {
   sf::Color sfml_color(color.r, color.g, color.b, color.a);
-  m_text.setColor(sfml_color);
+  m_text.setFillColor(sfml_color);
 }
 
-const GOM::IFont *GOM::Text::getFont() const
+const GOM::IFont *GOM::Text::getFont()
 {
   const sf::Font *sfml_font = m_text.getFont();
   GOM::Font *font = new GOM::Font(*sfml_font);
   return font;
 }
 
-unsigned int GOM::Text::getCharacterSize() const
+unsigned int GOM::Text::getCharacterSize()
 {
   return m_text.getCharacterSize();
 }
@@ -48,16 +48,20 @@ void GOM::Text::setScale(const GOM::Vector2f &factor)
   m_text.setScale(sfml_vector);
 }
 
-const GOM::Vector2f &GOM::Text::getPosition() const
+const GOM::Vector2f &GOM::Text::getPosition()
 {
-  const sf::Vector2f sfml_vector = m_text.getPosition();
-  GOM::Vector2f vector{sfml_vector.x, sfml_vector.y};
-  return vector;
+  sf::Vector2f sfml_vector = m_text.getPosition();
+  m_position = {sfml_vector.x, sfml_vector.y};
+  return m_position;
 }
 
-const std::string &GOM::Text::getString() const { return m_text.getString(); }
+const std::string &GOM::Text::getString()
+{
+  m_str = m_text.getString();
+  return m_str;
+}
 
-GOM::FloatRect GOM::Text::getLocalBounds() const
+GOM::FloatRect GOM::Text::getLocalBounds()
 {
   sf::FloatRect sfml_bounds = m_text.getLocalBounds();
   return GOM::FloatRect{sfml_bounds.left, sfml_bounds.top, sfml_bounds.width,

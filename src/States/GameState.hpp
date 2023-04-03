@@ -26,15 +26,17 @@ public:
     void draw() override;
 
 private:
+    GOM::ITexture *m_bg_border_light_t;
+    GOM::ITexture *m_bg_border_dark_t;
     GOM::ITexture *m_bg_dark_t;
     GOM::ITexture *m_bg_light_t;
     GOM::ISprite *m_bg_s;
     GOM::ITexture *m_line_dark_hor_t;
     GOM::ITexture *m_line_light_hor_t;
-    GOM::ISprite *m_line_hor_s;
     GOM::ITexture *m_line_dark_ver_t;
     GOM::ITexture *m_line_light_ver_t;
-    GOM::ISprite *m_line_ver_s;
+    GOM::ISprite *m_top_border_s;
+    GOM::ISprite *m_bot_border_s;
     // GOM::IFont *m_font;
     Button m_home;
     Button m_light;

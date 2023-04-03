@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.6)
 project(gomoku)
 
-set(GOMOKU_HPP ./src/Components/Button.hpp 
+set(GOMOKU_HPP ./src/Components/Button.hpp
+                ./src/Components/Textbox.hpp
                 ./src/Encapsulation/Event.hpp
                 ./src/Encapsulation/GraphicDataTypes.hpp
                 ./src/Encapsulation/IFont.hpp
@@ -26,9 +27,11 @@ set(GOMOKU_HPP ./src/Components/Button.hpp
                 ./src/StateMachine/StateMachine.hpp
                 ./src/States/GameState.hpp
                 ./src/States/MainState.hpp
-                ./src/States/ModeSelectLocal.hpp)
+                ./src/States/ModeSelectLocal.hpp
+                ./src/States/SettingsState.hpp)
 
-set(GOMOKU_CPP ./src/Components/Button.cpp 
+set(GOMOKU_CPP ./src/Components/Button.cpp
+                ./src/Components/Textbox.cpp
                 ./src/Encapsulation/SFML/Font.cpp
                 ./src/Encapsulation/SFML/GraphicLoader.cpp
                 ./src/Encapsulation/SFML/Mouse.cpp
@@ -43,6 +46,7 @@ set(GOMOKU_CPP ./src/Components/Button.cpp
                 ./src/States/GameState.cpp
                 ./src/States/MainState.cpp
                 ./src/States/ModeSelectLocal.cpp
+                ./src/States/SettingsState.cpp
                 ./src/main.cpp)
 
 include(FetchContent)

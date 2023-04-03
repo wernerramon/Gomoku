@@ -18,12 +18,12 @@ namespace GOM
         virtual void setString(const std::string &string) = 0;
         virtual void setCharacterSize(unsigned int size) = 0;
         virtual void setColor(const GOM::Color &color) = 0;
-        virtual const GOM::IFont *getFont() const = 0;
-        virtual unsigned int getCharacterSize() const = 0;
+        virtual const GOM::IFont *getFont() = 0;
+        virtual unsigned int getCharacterSize() = 0;
         virtual void setScale(const GOM::Vector2f &factor) = 0;
-        virtual const GOM::Vector2f &getPosition() const = 0;
-        virtual const std::string &getString() const = 0;
-        virtual GOM::FloatRect getLocalBounds() const = 0;
+        virtual const GOM::Vector2f &getPosition() = 0;
+        virtual const std::string &getString() = 0;
+        virtual GOM::FloatRect getLocalBounds() = 0;
     };
 } // namespace GOM
 

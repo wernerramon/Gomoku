@@ -94,6 +94,8 @@ void MainState::update()
             if (m_settings.is_pressed(mouse_pos_f))
             {
                 std::cout << "settings btn pressed" << std::endl;
+                m_next = StateMachine::build<SettingsState>(
+                    m_state_machine, m_window, m_graphic_loader, m_size, true);
             }
             if (m_exit.is_pressed(mouse_pos_f))
             {
