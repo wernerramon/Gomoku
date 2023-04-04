@@ -30,24 +30,30 @@ private:
     GOM::ITexture *m_bg_border_dark_t;
     GOM::ITexture *m_bg_dark_t;
     GOM::ITexture *m_bg_light_t;
-    GOM::ISprite *m_bg_s;
     GOM::ITexture *m_line_dark_hor_t;
     GOM::ITexture *m_line_light_hor_t;
     GOM::ITexture *m_line_dark_ver_t;
     GOM::ITexture *m_line_light_ver_t;
+    GOM::ITexture *m_cross_t;
+    GOM::ITexture *m_circle_t;
+    GOM::ISprite *m_bg_s;
     GOM::ISprite *m_top_border_s;
     GOM::ISprite *m_bot_border_s;
+    std::vector<GOM::ISprite *> m_lines_hor_s;
+    std::vector<GOM::ISprite *> m_lines_ver_s;
+    std::vector<GOM::ISprite *> m_cross_s;
+    std::vector<GOM::ISprite *> m_circle_s;
     // GOM::IFont *m_font;
+    GOM::Vector2i m_size;
     Button m_home;
     Button m_light;
     bool m_light_mode;
-    GOM::Vector2i m_size;
-    std::vector<GOM::ISprite *> m_lines_hor_s;
-    std::vector<GOM::ISprite *> m_lines_ver_s;
+    bool m_turn;
 
     void initSprites();
     // void initText();
     void initGrit();
+    void createIcon(GOM::Vector2f t_mouse_pos);
 };
 
 #endif /* !GAMESTATE_HPP_ */

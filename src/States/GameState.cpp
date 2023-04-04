@@ -44,6 +44,8 @@ void GameState::initSprites()
     m_line_light_hor_t = m_graphic_loader->loadTexture();
     m_line_dark_ver_t = m_graphic_loader->loadTexture();
     m_line_light_ver_t = m_graphic_loader->loadTexture();
+    m_cross_t = m_graphic_loader->loadTexture();
+    m_circle_t = m_graphic_loader->loadTexture();
     m_bg_s = m_graphic_loader->loadSprite();
     m_top_border_s = m_graphic_loader->loadSprite();
     m_bot_border_s = m_graphic_loader->loadSprite();
@@ -76,6 +78,14 @@ void GameState::initSprites()
         throw std::runtime_error("Unable to load image.");
     }
     if (!m_bg_border_dark_t->loadFromFile("./assets/sprites/game_border_dark.png"))
+    {
+        throw std::runtime_error("Unable to load image.");
+    }
+    if (!m_cross_t->loadFromFile("./assets/icons/cross.png"))
+    {
+        throw std::runtime_error("Unable to load image.");
+    }
+    if (!m_circle_t->loadFromFile("./assets/icons/target.png"))
     {
         throw std::runtime_error("Unable to load image.");
     }
@@ -116,12 +126,13 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
       m_home(Button("./assets/icons/home.png",
                     GOM::Vector2f{10, 10},
                     GOM::Vector2f{64, 64}, t_graphic_loader, true)),
-      m_light((Button("./assets/icons/gear.png",
+      m_light((Button("./assets/icons/contrast.png",
                       GOM::Vector2f{84, 10},
                       GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
     m_size = t_size;
     m_light_mode = true;
+    m_turn = true;
     initSprites();
     // initText();
     initGrit();
@@ -129,6 +140,58 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
 
 GameState::~GameState()
 {
+}
+
+void GameState::createIcon(GOM::Vector2f t_mouse_pos)
+{
+    GOM::Vector2i top_corner = {0, 100};
+    GOM::Vector2f pos = {0, 0};
+    if (m_turn)
+    {
+        for (int i = 0; i < m_size.x; i++)
+        {
+            if (t_mouse_pos.x > i * 37 && t_mouse_pos.x < (i + 1) * 37)
+            {
+                pos.x = i * 37;
+            }
+        }
+        for (int i = 0; i < m_size.y; i++)
+        {
+            if (t_mouse_pos.y > (i * 37) + 100 && t_mouse_pos.y < ((i + 1) * 37) + 100)
+            {
+                pos.y = (i * 37) + 100;
+            }
+        }
+        GOM::ISprite *tmp = m_graphic_loader->loadSprite();
+        tmp->setTexture(m_cross_t, true);
+        tmp->setScale({32.f / m_cross_t->getSize().x, 32.f / m_cross_t->getSize().y});
+        tmp->setPosition(pos);
+        tmp->setColor(GOM::Blue);
+        m_cross_s.push_back(tmp);
+    }
+    else
+    {
+        for (int i = 0; i < m_size.x; i++)
+        {
+            if (t_mouse_pos.x > i * 37 && t_mouse_pos.x < (i + 1) * 37)
+            {
+                pos.x = i * 37;
+            }
+        }
+        for (int i = 0; i < m_size.y; i++)
+        {
+            if (t_mouse_pos.y > (i * 37) + 100 && t_mouse_pos.y < ((i + 1) * 37) + 100)
+            {
+                pos.y = (i * 37) + 100;
+            }
+        }
+        GOM::ISprite *tmp = m_graphic_loader->loadSprite();
+        tmp->setTexture(m_circle_t, true);
+        tmp->setScale({32.f / m_cross_t->getSize().x, 32.f / m_cross_t->getSize().y});
+        tmp->setPosition(pos);
+        tmp->setColor(GOM::Red);
+        m_circle_s.push_back(tmp);
+    }
 }
 
 void GameState::update()
@@ -185,6 +248,14 @@ void GameState::update()
                 m_next = StateMachine::build<MainState>(
                     m_state_machine, m_window, m_graphic_loader, m_size, true);
             }
+            if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size.x * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size.y * 37 + 100)
+            {
+                createIcon(mouse_pos_f);
+                if (m_turn)
+                    m_turn = false;
+                else
+                    m_turn = true;
+            }
         }
 
         switch (event.type)
@@ -210,5 +281,9 @@ void GameState::draw()
         m_window->draw(*y);
     for (auto x = m_lines_ver_s.begin(); x != m_lines_ver_s.end(); ++x)
         m_window->draw(*x);
+    for (auto cross = m_cross_s.begin(); cross != m_cross_s.end(); ++cross)
+        m_window->draw(*cross);
+    for (auto circle = m_circle_s.begin(); circle != m_circle_s.end(); ++circle)
+        m_window->draw(*circle);
     m_window->display();
 }
