@@ -131,6 +131,15 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
                       GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
     m_size = t_size;
+    for (int y = 0; y < m_size.y; y++)
+    {
+        std::vector<int> tmp = {};
+        for (int x = 0; x < m_size.x; x++)
+        {
+            tmp.push_back(0);
+        }
+        m_board.push_back(tmp);
+    }
     m_light_mode = true;
     m_turn = true;
     initSprites();
@@ -164,6 +173,7 @@ bool GameState::isEmpty(GOM::Vector2f t_pos)
 void GameState::createIcon(GOM::Vector2f t_mouse_pos)
 {
     GOM::Vector2f pos = {0, 0};
+    GOM::Vector2i coord = {0, 0};
     if (m_turn)
     {
         for (int i = 0; i < m_size.x; i++)
@@ -171,6 +181,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
             if (t_mouse_pos.x > i * 37 && t_mouse_pos.x < (i + 1) * 37)
             {
                 pos.x = i * 37;
+                coord.x = i;
             }
         }
         for (int i = 0; i < m_size.y; i++)
@@ -178,6 +189,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
             if (t_mouse_pos.y > (i * 37) + 100 && t_mouse_pos.y < ((i + 1) * 37) + 100)
             {
                 pos.y = (i * 37) + 100;
+                coord.y = i;
             }
         }
         GOM::ISprite *tmp = m_graphic_loader->loadSprite();
@@ -185,6 +197,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
         tmp->setScale({32.f / m_cross_t->getSize().x, 32.f / m_cross_t->getSize().y});
         tmp->setPosition(pos);
         tmp->setColor(GOM::Blue);
+        m_board[coord.y][coord.x] = 1;
         m_cross_s.push_back(tmp);
     }
     else
@@ -194,6 +207,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
             if (t_mouse_pos.x > i * 37 && t_mouse_pos.x < (i + 1) * 37)
             {
                 pos.x = i * 37;
+                coord.x = i;
             }
         }
         for (int i = 0; i < m_size.y; i++)
@@ -201,6 +215,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
             if (t_mouse_pos.y > (i * 37) + 100 && t_mouse_pos.y < ((i + 1) * 37) + 100)
             {
                 pos.y = (i * 37) + 100;
+                coord.y = i;
             }
         }
         GOM::ISprite *tmp = m_graphic_loader->loadSprite();
@@ -208,8 +223,165 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
         tmp->setScale({32.f / m_cross_t->getSize().x, 32.f / m_cross_t->getSize().y});
         tmp->setPosition(pos);
         tmp->setColor(GOM::Red);
+        m_board[coord.y][coord.x] = -1;
         m_circle_s.push_back(tmp);
     }
+}
+
+bool GameState::gameOver()
+{
+    int rows = m_board.size();
+    int cols = m_board[0].size();
+
+    // check for horizontal five in a row
+    for (int r = 0; r < rows; r++)
+    {
+        for (int c = 0; c < cols - 4; c++)
+        {
+            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r][c + 1] && m_board[r][c] == m_board[r][c + 2] && m_board[r][c] == m_board[r][c + 3] && m_board[r][c] == m_board[r][c + 4])
+            {
+                return true;
+            }
+        }
+    }
+
+    // check for vertical five in a row
+    for (int r = 0; r < rows - 4; r++)
+    {
+        for (int c = 0; c < cols; c++)
+        {
+            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r + 1][c] && m_board[r][c] == m_board[r + 2][c] && m_board[r][c] == m_board[r + 3][c] && m_board[r][c] == m_board[r + 4][c])
+            {
+                return true;
+            }
+        }
+    }
+
+    // check for diagonal five in a row (top-left to bottom-right)
+    for (int r = 0; r < rows - 4; r++)
+    {
+        for (int c = 0; c < cols - 4; c++)
+        {
+            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r + 1][c + 1] && m_board[r][c] == m_board[r + 2][c + 2] && m_board[r][c] == m_board[r + 3][c + 3] && m_board[r][c] == m_board[r + 4][c + 4])
+            {
+                return true;
+            }
+        }
+    }
+
+    // check for diagonal five in a row (bottom-left to top-right)
+    for (int r = 4; r < rows; r++)
+    {
+        for (int c = 0; c < cols - 4; c++)
+        {
+            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r - 1][c + 1] && m_board[r][c] == m_board[r - 2][c + 2] && m_board[r][c] == m_board[r - 3][c + 3] && m_board[r][c] == m_board[r - 4][c + 4])
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+std::string checkWinner(std::vector<std::vector<int>> board)
+{
+    int n = board.size();
+
+    // Check rows
+    for (int i = 0; i < n; i++)
+    {
+        int count = 0;
+        for (int j = 0; j < n; j++)
+        {
+            if (board[i][j] == 1)
+            {
+                count++;
+            }
+            else
+            {
+                count = 0;
+            }
+            if (count == 5)
+            {
+                return "Player 1 won!";
+            }
+            if (count == -5)
+            {
+                return "Player 2 won!";
+            }
+        }
+    }
+
+    // Check columns
+    for (int j = 0; j < n; j++)
+    {
+        int count = 0;
+        for (int i = 0; i < n; i++)
+        {
+            if (board[i][j] == 1)
+            {
+                count++;
+            }
+            else
+            {
+                count = 0;
+            }
+            if (count == 5)
+            {
+                return "Player 1 won!";
+            }
+            if (count == -5)
+            {
+                return "Player 2 won!";
+            }
+        }
+    }
+
+    // Check diagonals
+    for (int i = 0; i < n - 4; i++)
+    {
+        for (int j = 0; j < n - 4; j++)
+        {
+            int count = 0;
+            for (int k = 0; k < 5; k++)
+            {
+                count += board[i + k][j + k];
+            }
+            if (count == 5)
+            {
+                return "Player 1 won!";
+            }
+            if (count == -5)
+            {
+                return "Player 2 won!";
+            }
+        }
+    }
+
+    // Check reverse diagonals
+    for (int i = 4; i < n; i++)
+    {
+        for (int j = 0; j < n - 4; j++)
+        {
+            int count = 0;
+            for (int k = 0; k < 5; k++)
+            {
+                count += board[i - k][j + k];
+            }
+            if (count == 5)
+            {
+                return "Player 1 won!";
+            }
+            if (count == -5)
+            {
+                return "Player 2 won!";
+            }
+        }
+    }
+
+    // If no winner yet
+    return "No winner yet.";
 }
 
 void GameState::update()
@@ -268,13 +440,19 @@ void GameState::update()
             }
             if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size.x * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size.y * 37 + 100)
             {
-                if (isEmpty(mouse_pos_f))
+                if (isEmpty(mouse_pos_f) /*&& !gameOver()*/)
                 {
                     createIcon(mouse_pos_f);
                     if (m_turn)
                         m_turn = false;
                     else
                         m_turn = true;
+                    std::cout << checkWinner(m_board) << std::endl;
+                    // if (gameOver())
+                    // {
+                    //     std::cout << "cross won!" << std::endl;
+                    //     break;
+                    // }
                 }
             }
         }

@@ -1,7 +1,9 @@
 #ifndef GAMESTATE_HPP_
 #define GAMESTATE_HPP_
 
+#include <algorithm>
 #include <iostream>
+#include <math.h>
 #include <vector>
 
 #include "../Encapsulation/ITexture.hpp"
@@ -43,6 +45,7 @@ private:
     std::vector<GOM::ISprite *> m_lines_ver_s;
     std::vector<GOM::ISprite *> m_cross_s;
     std::vector<GOM::ISprite *> m_circle_s;
+    std::vector<std::vector<int>> m_board;
     // GOM::IFont *m_font;
     GOM::Vector2i m_size;
     Button m_home;
@@ -55,6 +58,7 @@ private:
     void initGrit();
     void createIcon(GOM::Vector2f t_mouse_pos);
     bool isEmpty(GOM::Vector2f t_pos);
+    bool gameOver();
 };
 
 #endif /* !GAMESTATE_HPP_ */
