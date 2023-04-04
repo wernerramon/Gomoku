@@ -54,6 +54,7 @@ private:
     // void initText();
     void initGrit();
     void createIcon(GOM::Vector2f t_mouse_pos);
+    bool isEmpty(GOM::Vector2f t_pos);
 };
 
 #endif /* !GAMESTATE_HPP_ */

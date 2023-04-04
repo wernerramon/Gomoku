@@ -142,9 +142,27 @@ GameState::~GameState()
 {
 }
 
+bool GameState::isEmpty(GOM::Vector2f t_pos)
+{
+    for (int i = 0; i < m_cross_s.size(); i++)
+    {
+        if (m_cross_s[i]->contains(t_pos))
+        {
+            return false;
+        }
+    }
+    for (int i = 0; i < m_circle_s.size(); i++)
+    {
+        if (m_circle_s[i]->contains(t_pos))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void GameState::createIcon(GOM::Vector2f t_mouse_pos)
 {
-    GOM::Vector2i top_corner = {0, 100};
     GOM::Vector2f pos = {0, 0};
     if (m_turn)
     {
@@ -250,11 +268,14 @@ void GameState::update()
             }
             if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size.x * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size.y * 37 + 100)
             {
-                createIcon(mouse_pos_f);
-                if (m_turn)
-                    m_turn = false;
-                else
-                    m_turn = true;
+                if (isEmpty(mouse_pos_f))
+                {
+                    createIcon(mouse_pos_f);
+                    if (m_turn)
+                        m_turn = false;
+                    else
+                        m_turn = true;
+                }
             }
         }
 
