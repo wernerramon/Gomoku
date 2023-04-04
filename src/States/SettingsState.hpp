@@ -20,7 +20,7 @@
 class SettingsState final : public State
 {
 public:
-    SettingsState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+    SettingsState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                   GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace = true);
     ~SettingsState();
     void update() override;
@@ -43,6 +43,7 @@ private:
     GOM::Vector2i m_size;
     Textbox m_width;
     Textbox m_height;
+    std::size_t m_mode;
 
     void initSprites();
     void initText();

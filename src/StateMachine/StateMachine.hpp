@@ -21,7 +21,7 @@ public:
 
     template <typename T>
     static std::unique_ptr<T>
-    build(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+    build(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
           GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace = true);
 
 private:
@@ -31,14 +31,14 @@ private:
 
 template <typename T>
 std::unique_ptr<T>
-StateMachine::build(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+StateMachine::build(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                     GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace)
 {
     auto new_state = std::unique_ptr<T>{nullptr};
 
     try
     {
-        new_state = std::make_unique<T>(t_machine, t_window, t_graphic_loader, t_size,
+        new_state = std::make_unique<T>(t_machine, t_window, t_mode, t_graphic_loader, t_size,
                                         t_replace);
     }
     catch (std::runtime_error &exception)

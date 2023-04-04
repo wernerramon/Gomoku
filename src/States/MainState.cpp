@@ -34,7 +34,7 @@ void MainState::initText()
     m_title->setColor(GOM::EpiBlue);
 }
 
-MainState::MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+MainState::MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                      GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, const bool t_replace)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
       m_local(Button("./assets/sprites/BTN/button_local.png",
@@ -55,6 +55,7 @@ MainState::MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
                      GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
     m_size = t_size;
+    m_mode = t_mode;
     initSprites();
     initText();
 }
@@ -85,7 +86,7 @@ void MainState::update()
             {
                 std::cout << "local btn pressed" << std::endl;
                 m_next = StateMachine::build<ModeSelectLocal>(
-                    m_state_machine, m_window, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
             if (m_online.is_pressed(mouse_pos_f))
             {
@@ -95,7 +96,7 @@ void MainState::update()
             {
                 std::cout << "settings btn pressed" << std::endl;
                 m_next = StateMachine::build<SettingsState>(
-                    m_state_machine, m_window, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
             if (m_exit.is_pressed(mouse_pos_f))
             {

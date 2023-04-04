@@ -34,7 +34,7 @@ void ModeSelectLocal::initText()
     m_title->setColor(GOM::EpiBlue);
 }
 
-ModeSelectLocal::ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+ModeSelectLocal::ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                                  GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
       m_pvp(Button("./assets/sprites/BTN/button_p-vs-p.png",
@@ -51,6 +51,7 @@ ModeSelectLocal::ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_
                      GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
     m_size = t_size;
+    m_mode = t_mode;
     initSprites();
     initText();
 }
@@ -78,7 +79,7 @@ void ModeSelectLocal::update()
             {
                 std::cout << "pvp btn pressed" << std::endl;
                 m_next = StateMachine::build<GameState>(
-                    m_state_machine, m_window, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, 0, m_graphic_loader, m_size, true);
             }
             if (m_pve.is_pressed(mouse_pos_f))
             {
@@ -88,7 +89,7 @@ void ModeSelectLocal::update()
             {
                 std::cout << "home btn pressed" << std::endl;
                 m_next = StateMachine::build<MainState>(
-                    m_state_machine, m_window, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
         }
 

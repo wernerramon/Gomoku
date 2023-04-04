@@ -19,7 +19,7 @@
 class ModeSelectLocal final : public State
 {
 public:
-    ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+    ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                     GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace = true);
     ~ModeSelectLocal();
     void update() override;
@@ -34,6 +34,7 @@ private:
     Button m_pve;
     Button m_home;
     GOM::Vector2i m_size;
+    std::size_t m_mode;
 
     void initSprites();
     void initText();

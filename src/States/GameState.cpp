@@ -36,6 +36,7 @@ void GameState::initSprites()
 {
     float size_x = m_window->getSize().x;
     float size_y = m_window->getSize().y;
+
     m_bg_dark_t = m_graphic_loader->loadTexture();
     m_bg_border_light_t = m_graphic_loader->loadTexture();
     m_bg_border_dark_t = m_graphic_loader->loadTexture();
@@ -46,9 +47,12 @@ void GameState::initSprites()
     m_line_light_ver_t = m_graphic_loader->loadTexture();
     m_cross_t = m_graphic_loader->loadTexture();
     m_circle_t = m_graphic_loader->loadTexture();
+
     m_bg_s = m_graphic_loader->loadSprite();
     m_top_border_s = m_graphic_loader->loadSprite();
     m_bot_border_s = m_graphic_loader->loadSprite();
+    m_icon_p1 = m_graphic_loader->loadSprite();
+    m_icon_p2 = m_graphic_loader->loadSprite();
     if (!m_bg_dark_t->loadFromFile("./assets/sprites/bg_dark.png"))
     {
         throw std::runtime_error("Unable to load image.");
@@ -107,20 +111,87 @@ void GameState::initSprites()
 
     m_bot_border_s->setPosition({0, 845});
     m_bg_s->setScale({scale_x, scale_y});
+    m_icon_p1->setTexture(m_cross_t, true);
+    m_icon_p2->setTexture(m_circle_t, true);
+    m_icon_p1->setScale({40.f / m_cross_t->getSize().x, 40.f / m_cross_t->getSize().y});
+    m_icon_p2->setScale({40.f / m_cross_t->getSize().x, 40.f / m_cross_t->getSize().y});
+    m_icon_p1->setColor(GOM::Blue);
+    m_icon_p2->setColor(GOM::Red);
 }
 
-// void GameState::initText()
-// {
-//     float size_x = m_window->getSize().x;
-//     float size_y = m_window->getSize().y;
-//     m_font = m_graphic_loader->loadFont();
-//     if (!m_font->loadFromFile("./assets/font/Roboto/Roboto-Black.ttf"))
-//     {
-//         throw std::runtime_error("Unable to load font.");
-//     }
-// }
+void GameState::initText()
+{
+    float size_x = m_window->getSize().x;
+    float size_y = m_window->getSize().y;
+    m_font = m_graphic_loader->loadFont();
+    if (!m_font->loadFromFile("./assets/font/Roboto/Roboto-Black.ttf"))
+    {
+        throw std::runtime_error("Unable to load font.");
+    }
+    m_p1_name = m_graphic_loader->loadText();
+    m_p2_name = m_graphic_loader->loadText();
+    m_score = m_graphic_loader->loadText();
+    m_move = m_graphic_loader->loadText();
+    m_time_total_p1 = m_graphic_loader->loadText();
+    m_time_turn_p1 = m_graphic_loader->loadText();
+    m_time_total_p2 = m_graphic_loader->loadText();
+    m_time_turn_p2 = m_graphic_loader->loadText();
 
-GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+    m_p1_name->setFont(m_font);
+    m_p2_name->setFont(m_font);
+    m_score->setFont(m_font);
+    m_move->setFont(m_font);
+    m_time_total_p1->setFont(m_font);
+    m_time_turn_p1->setFont(m_font);
+    m_time_total_p2->setFont(m_font);
+    m_time_turn_p2->setFont(m_font);
+
+    m_p1_name->setCharacterSize(25);
+    m_p2_name->setCharacterSize(25);
+    m_score->setCharacterSize(25);
+    m_move->setCharacterSize(25);
+    m_time_total_p1->setCharacterSize(25);
+    m_time_turn_p1->setCharacterSize(25);
+    m_time_total_p2->setCharacterSize(25);
+    m_time_turn_p2->setCharacterSize(25);
+
+    if (m_mode == 0 || m_mode == 1)
+    {
+        m_p1_name->setString("HUMAN");
+        m_p2_name->setString("HUMAN");
+    }
+    else if (m_mode == 2)
+    {
+        m_p1_name->setString("HUMAN");
+        m_p2_name->setString("AI");
+    }
+    else
+    {
+        m_p1_name->setString("AI");
+        m_p2_name->setString("AI");
+    }
+
+    m_score->setString("SCORE 0:0");
+    m_move->setString("MOVE 0");
+    m_time_total_p1->setString("0:00");
+    m_time_turn_p1->setString("0.0");
+    m_time_total_p2->setString("0:00");
+    m_time_turn_p2->setString("0.0");
+
+    m_time_total_p1->setPosition({10, 855});
+    m_time_turn_p1->setPosition({10, 865 + m_time_total_p1->getLocalBounds().height});
+    m_score->setPosition({size_x / 2 - (m_score->getLocalBounds().width / 2), 855});
+    m_move->setPosition({size_x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
+    m_time_total_p2->setPosition({size_x - 10 - m_time_total_p2->getLocalBounds().width, 855});
+    m_time_turn_p2->setPosition({size_x - 10 - m_time_turn_p2->getLocalBounds().width, 865 + m_time_total_p2->getLocalBounds().height});
+    m_p1_name->setPosition({size_x / 4 - (m_p1_name->getLocalBounds().width / 2), 855});
+    m_p2_name->setPosition({(size_x * 0.75f) - (m_p2_name->getLocalBounds().width / 2), 855});
+
+    m_icon_p1->setPosition({(size_x / 4) - 20, 865 + m_p1_name->getLocalBounds().height});
+    m_icon_p2->setPosition({(size_x * 0.75f) - 20, 865 + m_p2_name->getLocalBounds().height});
+}
+
+GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                      GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
       m_home(Button("./assets/icons/home.png",
@@ -142,8 +213,9 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
     }
     m_light_mode = true;
     m_turn = true;
+    m_mode = t_mode;
     initSprites();
-    // initText();
+    initText();
     initGrit();
 }
 
@@ -194,7 +266,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
         }
         GOM::ISprite *tmp = m_graphic_loader->loadSprite();
         tmp->setTexture(m_cross_t, true);
-        tmp->setScale({32.f / m_cross_t->getSize().x, 32.f / m_cross_t->getSize().y});
+        tmp->setScale({40.f / m_cross_t->getSize().x, 40.f / m_cross_t->getSize().y});
         tmp->setPosition(pos);
         tmp->setColor(GOM::Blue);
         m_board[coord.y][coord.x] = 1;
@@ -220,7 +292,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
         }
         GOM::ISprite *tmp = m_graphic_loader->loadSprite();
         tmp->setTexture(m_circle_t, true);
-        tmp->setScale({32.f / m_cross_t->getSize().x, 32.f / m_cross_t->getSize().y});
+        tmp->setScale({40.f / m_cross_t->getSize().x, 40.f / m_cross_t->getSize().y});
         tmp->setPosition(pos);
         tmp->setColor(GOM::Red);
         m_board[coord.y][coord.x] = -1;
@@ -436,7 +508,7 @@ void GameState::update()
             {
                 std::cout << "home btn pressed" << std::endl;
                 m_next = StateMachine::build<MainState>(
-                    m_state_machine, m_window, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
             if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size.x * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size.y * 37 + 100)
             {
@@ -484,5 +556,15 @@ void GameState::draw()
         m_window->draw(*cross);
     for (auto circle = m_circle_s.begin(); circle != m_circle_s.end(); ++circle)
         m_window->draw(*circle);
+    m_window->draw(m_time_total_p1);
+    m_window->draw(m_time_turn_p1);
+    m_window->draw(m_p1_name);
+    m_window->draw(m_score);
+    m_window->draw(m_move);
+    m_window->draw(m_p2_name);
+    m_window->draw(m_time_total_p2);
+    m_window->draw(m_time_turn_p2);
+    m_window->draw(m_icon_p1);
+    m_window->draw(m_icon_p2);
     m_window->display();
 }

@@ -10,7 +10,7 @@ Core::Core()
     m_window->setFramerateLimit(60);
     srand(time(nullptr));
     m_state_machine.run(StateMachine::build<MainState>(
-        m_state_machine, m_window, m_graphic_loader, {20, 20}, true));
+        m_state_machine, m_window, 0, m_graphic_loader, {20, 20}, true));
 }
 
 Core::~Core()

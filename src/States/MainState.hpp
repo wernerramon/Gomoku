@@ -19,7 +19,7 @@
 class MainState final : public State
 {
 public:
-    MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+    MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
               GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace = true);
     ~MainState();
     void update() override;
@@ -35,6 +35,7 @@ private:
     Button m_settings;
     Button m_exit;
     GOM::Vector2i m_size;
+    std::size_t m_mode;
 
     void initSprites();
     void initText();

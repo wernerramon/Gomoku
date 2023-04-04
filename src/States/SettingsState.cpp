@@ -81,7 +81,7 @@ void SettingsState::initText()
     m_bg_height_s->setPosition({m_txt_height->getPosition().x - 10, (size_y / 2)});
 }
 
-SettingsState::SettingsState(StateMachine &t_machine, GOM::IRenderWindow *t_window,
+SettingsState::SettingsState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
                              GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
       m_home(Button("./assets/icons/home.png",
@@ -92,6 +92,7 @@ SettingsState::SettingsState(StateMachine &t_machine, GOM::IRenderWindow *t_wind
       m_width(Textbox(30, GOM::EpiBlue, false, t_graphic_loader))
 {
     m_size = t_size;
+    m_mode = t_mode;
     initSprites();
     initText();
 }
@@ -118,7 +119,7 @@ void SettingsState::update()
             {
                 std::cout << "home btn pressed" << std::endl;
                 m_next = StateMachine::build<MainState>(
-                    m_state_machine, m_window, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
             if (m_bg_width_s->contains(mouse_pos_f) && !m_height.getSelected())
             {
