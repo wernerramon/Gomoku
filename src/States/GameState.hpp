@@ -42,6 +42,7 @@ private:
     GOM::ISprite *m_bg_s;
     GOM::ISprite *m_top_border_s;
     GOM::ISprite *m_bot_border_s;
+    GOM::ISprite *m_bg_restart_s;
     std::vector<GOM::ISprite *> m_lines_hor_s;
     std::vector<GOM::ISprite *> m_lines_ver_s;
     std::vector<GOM::ISprite *> m_cross_s;
@@ -61,6 +62,7 @@ private:
     GOM::IText *m_time_turn_p1;
     GOM::IText *m_time_total_p2;
     GOM::IText *m_time_turn_p2;
+    GOM::IText *m_restart;
 
     GOM::Vector2i m_size;
     Button m_home;
@@ -68,13 +70,16 @@ private:
     bool m_light_mode;
     bool m_turn;
     std::size_t m_mode;
+    int m_score_p1;
+    int m_score_p2;
+    int m_move_count;
 
     void initSprites();
     void initText();
     void initGrit();
     void createIcon(GOM::Vector2f t_mouse_pos);
     bool isEmpty(GOM::Vector2f t_pos);
-    bool gameOver();
+    int check_win_or_draw(const std::vector<std::vector<int>> &board);
 };
 
 #endif /* !GAMESTATE_HPP_ */

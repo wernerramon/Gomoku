@@ -53,6 +53,8 @@ void GameState::initSprites()
     m_bot_border_s = m_graphic_loader->loadSprite();
     m_icon_p1 = m_graphic_loader->loadSprite();
     m_icon_p2 = m_graphic_loader->loadSprite();
+    m_bg_restart_s = m_graphic_loader->loadSprite();
+
     if (!m_bg_dark_t->loadFromFile("./assets/sprites/bg_dark.png"))
     {
         throw std::runtime_error("Unable to load image.");
@@ -101,15 +103,18 @@ void GameState::initSprites()
         m_bg_s->setTexture(m_bg_light_t, true);
         m_top_border_s->setTexture(m_bg_border_light_t, true);
         m_bot_border_s->setTexture(m_bg_border_light_t, true);
+        m_bg_restart_s->setTexture(m_bg_border_light_t, true);
     }
     else
     {
         m_bg_s->setTexture(m_bg_dark_t, true);
         m_top_border_s->setTexture(m_bg_border_dark_t, true);
         m_bot_border_s->setTexture(m_bg_border_dark_t, true);
+        m_bg_restart_s->setTexture(m_bg_border_dark_t, true);
     }
 
     m_bot_border_s->setPosition({0, 845});
+    m_bg_restart_s->setPosition({0, size_y / 2 - 25});
     m_bg_s->setScale({scale_x, scale_y});
     m_icon_p1->setTexture(m_cross_t, true);
     m_icon_p2->setTexture(m_circle_t, true);
@@ -136,6 +141,7 @@ void GameState::initText()
     m_time_turn_p1 = m_graphic_loader->loadText();
     m_time_total_p2 = m_graphic_loader->loadText();
     m_time_turn_p2 = m_graphic_loader->loadText();
+    m_restart = m_graphic_loader->loadText();
 
     m_p1_name->setFont(m_font);
     m_p2_name->setFont(m_font);
@@ -145,6 +151,7 @@ void GameState::initText()
     m_time_turn_p1->setFont(m_font);
     m_time_total_p2->setFont(m_font);
     m_time_turn_p2->setFont(m_font);
+    m_restart->setFont(m_font);
 
     m_p1_name->setCharacterSize(25);
     m_p2_name->setCharacterSize(25);
@@ -154,6 +161,7 @@ void GameState::initText()
     m_time_turn_p1->setCharacterSize(25);
     m_time_total_p2->setCharacterSize(25);
     m_time_turn_p2->setCharacterSize(25);
+    m_restart->setCharacterSize(30);
 
     if (m_mode == 0 || m_mode == 1)
     {
@@ -171,12 +179,13 @@ void GameState::initText()
         m_p2_name->setString("AI");
     }
 
-    m_score->setString("SCORE 0:0");
-    m_move->setString("MOVE 0");
+    m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
+    m_move->setString("MOVE " + std::to_string(m_move_count));
     m_time_total_p1->setString("0:00");
     m_time_turn_p1->setString("0.0");
     m_time_total_p2->setString("0:00");
     m_time_turn_p2->setString("0.0");
+    m_restart->setString("PRESS 'ENTER' TO PLAY AGAIN!");
 
     m_time_total_p1->setPosition({10, 855});
     m_time_turn_p1->setPosition({10, 865 + m_time_total_p1->getLocalBounds().height});
@@ -186,7 +195,8 @@ void GameState::initText()
     m_time_turn_p2->setPosition({size_x - 10 - m_time_turn_p2->getLocalBounds().width, 865 + m_time_total_p2->getLocalBounds().height});
     m_p1_name->setPosition({size_x / 4 - (m_p1_name->getLocalBounds().width / 2), 855});
     m_p2_name->setPosition({(size_x * 0.75f) - (m_p2_name->getLocalBounds().width / 2), 855});
-
+    m_restart->setPosition({size_x / 2 - (m_restart->getLocalBounds().width / 2), size_y / 2});
+    m_restart->setColor(GOM::Red);
     m_icon_p1->setPosition({(size_x / 4) - 20, 865 + m_p1_name->getLocalBounds().height});
     m_icon_p2->setPosition({(size_x * 0.75f) - 20, 865 + m_p2_name->getLocalBounds().height});
 }
@@ -214,6 +224,9 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std:
     m_light_mode = true;
     m_turn = true;
     m_mode = t_mode;
+    m_score_p1 = 0;
+    m_score_p2 = 0;
+    m_move_count = 0;
     initSprites();
     initText();
     initGrit();
@@ -295,169 +308,116 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
         tmp->setScale({40.f / m_cross_t->getSize().x, 40.f / m_cross_t->getSize().y});
         tmp->setPosition(pos);
         tmp->setColor(GOM::Red);
-        m_board[coord.y][coord.x] = -1;
+        m_board[coord.y][coord.x] = 2;
         m_circle_s.push_back(tmp);
     }
 }
 
-bool GameState::gameOver()
+int GameState::check_win_or_draw(const std::vector<std::vector<int>> &board)
 {
-    int rows = m_board.size();
-    int cols = m_board[0].size();
-
-    // check for horizontal five in a row
-    for (int r = 0; r < rows; r++)
+    // check horzontal win
+    for (const auto &row : board)
     {
-        for (int c = 0; c < cols - 4; c++)
+        int check = 0;
+        for (int i = 0; i <= row.size() - 5; i++)
         {
-            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r][c + 1] && m_board[r][c] == m_board[r][c + 2] && m_board[r][c] == m_board[r][c + 3] && m_board[r][c] == m_board[r][c + 4])
+            if (row[i] == 1 && row[i] == row[i + 1] && row[i] == row[i + 2] && row[i] == row[i + 3] && row[i] == row[i + 4])
             {
-                return true;
+                return 1;
+            }
+            if (row[i] == 2 && row[i] == row[i + 1] && row[i] == row[i + 2] && row[i] == row[i + 3] && row[i] == row[i + 4])
+            {
+                return 2;
+            }
+        }
+    }
+    // check vertical win
+    for (int col = 0; col < board[0].size(); col++)
+    {
+        for (int row = 0; row <= board.size() - 5; row++)
+        {
+            if (board[row][col] == 1 && board[row][col] == board[row + 1][col] && board[row][col] == board[row + 2][col] &&
+                board[row][col] == board[row + 3][col] && board[row][col] == board[row + 4][col])
+            {
+                return 1;
+            }
+            if (board[row][col] == 2 && board[row][col] == board[row + 1][col] && board[row][col] == board[row + 2][col] &&
+                board[row][col] == board[row + 3][col] && board[row][col] == board[row + 4][col])
+            {
+                return 2;
+            }
+        }
+    }
+    // Check for diagonal win (top-left to bottom-right)
+    for (int row = 0; row <= board.size() - 5; row++)
+    {
+        for (int col = 0; col <= board[0].size() - 5; col++)
+        {
+            if (board[row][col] == 1 && board[row][col] == board[row + 1][col + 1] && board[row][col] == board[row + 2][col + 2] &&
+                board[row][col] == board[row + 3][col + 3] && board[row][col] == board[row + 4][col + 4])
+            {
+                return 1;
+            }
+            if (board[row][col] == 2 && board[row][col] == board[row + 1][col + 1] && board[row][col] == board[row + 2][col + 2] &&
+                board[row][col] == board[row + 3][col + 3] && board[row][col] == board[row + 4][col + 4])
+            {
+                return 2;
             }
         }
     }
 
-    // check for vertical five in a row
-    for (int r = 0; r < rows - 4; r++)
+    // Check for diagonal win (top-right to bottom-left)
+    for (int row = 0; row <= board.size() - 5; row++)
     {
-        for (int c = 0; c < cols; c++)
+        for (int col = 4; col < board[0].size(); col++)
         {
-            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r + 1][c] && m_board[r][c] == m_board[r + 2][c] && m_board[r][c] == m_board[r + 3][c] && m_board[r][c] == m_board[r + 4][c])
+            if (board[row][col] == 1 && board[row][col] == board[row + 1][col - 1] && board[row][col] == board[row + 2][col - 2] &&
+                board[row][col] == board[row + 3][col - 3] && board[row][col] == board[row + 4][col - 4])
             {
-                return true;
+                return 1;
+            }
+            if (board[row][col] == 2 && board[row][col] == board[row + 1][col - 1] && board[row][col] == board[row + 2][col - 2] &&
+                board[row][col] == board[row + 3][col - 3] && board[row][col] == board[row + 4][col - 4])
+            {
+                return 2;
             }
         }
     }
-
-    // check for diagonal five in a row (top-left to bottom-right)
-    for (int r = 0; r < rows - 4; r++)
+    bool is_draw = true;
+    for (const auto &row : board)
     {
-        for (int c = 0; c < cols - 4; c++)
+        for (int cell : row)
         {
-            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r + 1][c + 1] && m_board[r][c] == m_board[r + 2][c + 2] && m_board[r][c] == m_board[r + 3][c + 3] && m_board[r][c] == m_board[r + 4][c + 4])
+            if (cell == 0)
             {
-                return true;
+                is_draw = false;
+                break;
             }
         }
-    }
-
-    // check for diagonal five in a row (bottom-left to top-right)
-    for (int r = 4; r < rows; r++)
-    {
-        for (int c = 0; c < cols - 4; c++)
+        if (!is_draw)
         {
-            if (m_board[r][c] != 0 && m_board[r][c] == m_board[r - 1][c + 1] && m_board[r][c] == m_board[r - 2][c + 2] && m_board[r][c] == m_board[r - 3][c + 3] && m_board[r][c] == m_board[r - 4][c + 4])
-            {
-                return true;
-            }
+            break;
         }
     }
-
-    return false;
-}
-
-std::string checkWinner(std::vector<std::vector<int>> board)
-{
-    int n = board.size();
-
-    // Check rows
-    for (int i = 0; i < n; i++)
+    if (is_draw)
     {
-        int count = 0;
-        for (int j = 0; j < n; j++)
-        {
-            if (board[i][j] == 1)
-            {
-                count++;
-            }
-            else
-            {
-                count = 0;
-            }
-            if (count == 5)
-            {
-                return "Player 1 won!";
-            }
-            if (count == -5)
-            {
-                return "Player 2 won!";
-            }
-        }
+        return 3; // Draw
     }
-
-    // Check columns
-    for (int j = 0; j < n; j++)
-    {
-        int count = 0;
-        for (int i = 0; i < n; i++)
-        {
-            if (board[i][j] == 1)
-            {
-                count++;
-            }
-            else
-            {
-                count = 0;
-            }
-            if (count == 5)
-            {
-                return "Player 1 won!";
-            }
-            if (count == -5)
-            {
-                return "Player 2 won!";
-            }
-        }
-    }
-
-    // Check diagonals
-    for (int i = 0; i < n - 4; i++)
-    {
-        for (int j = 0; j < n - 4; j++)
-        {
-            int count = 0;
-            for (int k = 0; k < 5; k++)
-            {
-                count += board[i + k][j + k];
-            }
-            if (count == 5)
-            {
-                return "Player 1 won!";
-            }
-            if (count == -5)
-            {
-                return "Player 2 won!";
-            }
-        }
-    }
-
-    // Check reverse diagonals
-    for (int i = 4; i < n; i++)
-    {
-        for (int j = 0; j < n - 4; j++)
-        {
-            int count = 0;
-            for (int k = 0; k < 5; k++)
-            {
-                count += board[i - k][j + k];
-            }
-            if (count == 5)
-            {
-                return "Player 1 won!";
-            }
-            if (count == -5)
-            {
-                return "Player 2 won!";
-            }
-        }
-    }
-
-    // If no winner yet
-    return "No winner yet.";
+    return 0;
 }
 
 void GameState::update()
 {
+    if (m_turn)
+    {
+        m_p1_name->setColor(GOM::EpiBlue);
+        m_p2_name->setColor(GOM::White);
+    }
+    else
+    {
+        m_p2_name->setColor(GOM::EpiBlue);
+        m_p1_name->setColor(GOM::White);
+    }
     for (auto event = GOM::Event{}; m_window->pollEvent(event);)
     {
         GOM::Vector2i mouse_pos = m_mouse->getMousePosition(m_window);
@@ -479,6 +439,7 @@ void GameState::update()
                     m_bg_s->setTexture(m_bg_dark_t, true);
                     m_top_border_s->setTexture(m_bg_border_dark_t, true);
                     m_bot_border_s->setTexture(m_bg_border_dark_t, true);
+                    m_bg_restart_s->setTexture(m_bg_border_dark_t, true);
                     for (int i = 0; i < m_lines_hor_s.size(); i++)
                     {
                         m_lines_hor_s[i]->setTexture(m_line_dark_hor_t, true);
@@ -494,6 +455,7 @@ void GameState::update()
                     m_bg_s->setTexture(m_bg_light_t, true);
                     m_top_border_s->setTexture(m_bg_border_light_t, true);
                     m_bot_border_s->setTexture(m_bg_border_light_t, true);
+                    m_bg_restart_s->setTexture(m_bg_border_light_t, true);
                     for (int i = 0; i < m_lines_hor_s.size(); i++)
                     {
                         m_lines_hor_s[i]->setTexture(m_line_light_hor_t, true);
@@ -512,19 +474,34 @@ void GameState::update()
             }
             if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size.x * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size.y * 37 + 100)
             {
-                if (isEmpty(mouse_pos_f) /*&& !gameOver()*/)
+                if (isEmpty(mouse_pos_f) && check_win_or_draw(m_board) == 0)
                 {
                     createIcon(mouse_pos_f);
                     if (m_turn)
                         m_turn = false;
                     else
                         m_turn = true;
-                    std::cout << checkWinner(m_board) << std::endl;
-                    // if (gameOver())
-                    // {
-                    //     std::cout << "cross won!" << std::endl;
-                    //     break;
-                    // }
+                    m_move_count++;
+                    m_move->setString("MOVE " + std::to_string(m_move_count));
+                    m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
+                    if (check_win_or_draw(m_board) == 1)
+                    {
+                        std::cout << "Player 1 won!" << std::endl;
+                        m_score_p1++;
+                        m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
+                        m_score->setPosition({m_window->getSize().x / 2 - (m_score->getLocalBounds().width / 2), 855});
+                    }
+                    else if (check_win_or_draw(m_board) == 2)
+                    {
+                        std::cout << "Player 2 won!" << std::endl;
+                        m_score_p2++;
+                        m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
+                        m_score->setPosition({m_window->getSize().x / 2 - (m_score->getLocalBounds().width / 2), 855});
+                    }
+                    else if (check_win_or_draw(m_board) == 3)
+                    {
+                        std::cout << "Draw!" << std::endl;
+                    }
                 }
             }
         }
@@ -534,6 +511,28 @@ void GameState::update()
         case GOM::EventType::Closed:
             m_state_machine.quit();
             break;
+        case GOM::EventType::KeyPressed:
+            switch (event.key)
+            {
+            case GOM::EventKey::Enter:
+                m_move_count = 0;
+                m_move->setString("MOVE " + std::to_string(m_move_count));
+                m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
+                m_circle_s.clear();
+                m_cross_s.clear();
+                m_board.clear();
+                for (int y = 0; y < m_size.y; y++)
+                {
+                    std::vector<int> tmp = {};
+                    for (int x = 0; x < m_size.x; x++)
+                    {
+                        tmp.push_back(0);
+                    }
+                    m_board.push_back(tmp);
+                }
+            default:
+                break;
+            }
         default:
             break;
         }
@@ -556,6 +555,11 @@ void GameState::draw()
         m_window->draw(*cross);
     for (auto circle = m_circle_s.begin(); circle != m_circle_s.end(); ++circle)
         m_window->draw(*circle);
+    if (check_win_or_draw(m_board) != 0)
+    {
+        m_window->draw(m_bg_restart_s);
+        m_window->draw(m_restart);
+    }
     m_window->draw(m_time_total_p1);
     m_window->draw(m_time_turn_p1);
     m_window->draw(m_p1_name);
