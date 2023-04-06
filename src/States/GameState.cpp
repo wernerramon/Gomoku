@@ -114,7 +114,7 @@ void GameState::initSprites()
     }
 
     m_bot_border_s->setPosition({0, 845});
-    m_bg_restart_s->setPosition({0, size_y / 2 - 25});
+    m_bg_restart_s->setPosition({0, size_y / 2 - 50});
     m_bg_s->setScale({scale_x, scale_y});
     m_icon_p1->setTexture(m_cross_t, true);
     m_icon_p2->setTexture(m_circle_t, true);
@@ -142,6 +142,7 @@ void GameState::initText()
     m_time_total_p2 = m_graphic_loader->loadText();
     m_time_turn_p2 = m_graphic_loader->loadText();
     m_restart = m_graphic_loader->loadText();
+    m_winner = m_graphic_loader->loadText();
 
     m_p1_name->setFont(m_font);
     m_p2_name->setFont(m_font);
@@ -152,6 +153,7 @@ void GameState::initText()
     m_time_total_p2->setFont(m_font);
     m_time_turn_p2->setFont(m_font);
     m_restart->setFont(m_font);
+    m_winner->setFont(m_font);
 
     m_p1_name->setCharacterSize(25);
     m_p2_name->setCharacterSize(25);
@@ -161,14 +163,15 @@ void GameState::initText()
     m_time_turn_p1->setCharacterSize(25);
     m_time_total_p2->setCharacterSize(25);
     m_time_turn_p2->setCharacterSize(25);
-    m_restart->setCharacterSize(30);
+    m_restart->setCharacterSize(25);
+    m_winner->setCharacterSize(25);
 
-    if (m_mode == 0 || m_mode == 1)
+    if (m_mode == 0 || m_mode == 1 || m_mode == 2)
     {
         m_p1_name->setString("HUMAN");
         m_p2_name->setString("HUMAN");
     }
-    else if (m_mode == 2)
+    else if (m_mode == 3)
     {
         m_p1_name->setString("HUMAN");
         m_p2_name->setString("AI");
@@ -186,6 +189,7 @@ void GameState::initText()
     m_time_total_p2->setString("0:00");
     m_time_turn_p2->setString("0.0");
     m_restart->setString("PRESS 'ENTER' TO PLAY AGAIN!");
+    m_winner->setString("PLACEHOLDER");
 
     m_time_total_p1->setPosition({10, 855});
     m_time_turn_p1->setPosition({10, 865 + m_time_total_p1->getLocalBounds().height});
@@ -197,6 +201,8 @@ void GameState::initText()
     m_p2_name->setPosition({(size_x * 0.75f) - (m_p2_name->getLocalBounds().width / 2), 855});
     m_restart->setPosition({size_x / 2 - (m_restart->getLocalBounds().width / 2), size_y / 2});
     m_restart->setColor(GOM::Red);
+    m_winner->setPosition({size_x / 2 - (m_winner->getLocalBounds().width / 2), size_y / 2 - m_winner->getLocalBounds().height});
+    m_winner->setColor(GOM::Red);
     m_icon_p1->setPosition({(size_x / 4) - 20, 865 + m_p1_name->getLocalBounds().height});
     m_icon_p2->setPosition({(size_x * 0.75f) - 20, 865 + m_p2_name->getLocalBounds().height});
 }
@@ -227,6 +233,16 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std:
     m_score_p1 = 0;
     m_score_p2 = 0;
     m_move_count = 0;
+
+    if (m_mode == 1)
+    {
+        m_is_host = true;
+    }
+    else
+    {
+        m_is_host = false;
+    }
+
     initSprites();
     initText();
     initGrit();
@@ -486,6 +502,9 @@ void GameState::update()
                     m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
                     if (check_win_or_draw(m_board) == 1)
                     {
+
+                        m_winner->setString("PLAYER 1 WON!!!");
+                        m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
                         std::cout << "Player 1 won!" << std::endl;
                         m_score_p1++;
                         m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
@@ -493,6 +512,9 @@ void GameState::update()
                     }
                     else if (check_win_or_draw(m_board) == 2)
                     {
+
+                        m_winner->setString("PLAYER 2 WON!!!");
+                        m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
                         std::cout << "Player 2 won!" << std::endl;
                         m_score_p2++;
                         m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
@@ -500,6 +522,8 @@ void GameState::update()
                     }
                     else if (check_win_or_draw(m_board) == 3)
                     {
+                        m_winner->setString("DRAW");
+                        m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
                         std::cout << "Draw!" << std::endl;
                     }
                 }
@@ -558,6 +582,7 @@ void GameState::draw()
     if (check_win_or_draw(m_board) != 0)
     {
         m_window->draw(m_bg_restart_s);
+        m_window->draw(m_winner);
         m_window->draw(m_restart);
     }
     m_window->draw(m_time_total_p1);

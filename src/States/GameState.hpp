@@ -63,6 +63,7 @@ private:
     GOM::IText *m_time_total_p2;
     GOM::IText *m_time_turn_p2;
     GOM::IText *m_restart;
+    GOM::IText *m_winner;
 
     GOM::Vector2i m_size;
     Button m_home;
@@ -73,6 +74,8 @@ private:
     int m_score_p1;
     int m_score_p2;
     int m_move_count;
+
+    bool m_is_host;
 
     void initSprites();
     void initText();
