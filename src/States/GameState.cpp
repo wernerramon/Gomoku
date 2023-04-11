@@ -215,7 +215,10 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std:
                     GOM::Vector2f{64, 64}, t_graphic_loader, true)),
       m_light((Button("./assets/icons/contrast.png",
                       GOM::Vector2f{84, 10},
-                      GOM::Vector2f{64, 64}, t_graphic_loader, true)))
+                      GOM::Vector2f{64, 64}, t_graphic_loader, true))),
+      m_swap((Button("./assets/icons/swap.png",
+                     GOM::Vector2f{static_cast<float>(t_window->getSize().x) - 74, 10},
+                     GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
     m_size = t_size;
     for (int y = 0; y < m_size.y; y++)
@@ -443,6 +446,7 @@ void GameState::update()
         {
             m_home.is_hovered(mouse_pos_f);
             m_light.is_hovered(mouse_pos_f);
+            m_swap.is_hovered(mouse_pos_f);
         }
         if (m_mouse->isLeftMouseButtonPressed())
         {
@@ -487,6 +491,13 @@ void GameState::update()
                 std::cout << "home btn pressed" << std::endl;
                 m_next = StateMachine::build<MainState>(
                     m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
+            }
+            if (m_swap.is_pressed(mouse_pos_f))
+            {
+                if (m_turn)
+                    m_turn = false;
+                else
+                    m_turn = true;
             }
             if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size.x * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size.y * 37 + 100)
             {
@@ -571,6 +582,7 @@ void GameState::draw()
     m_window->draw(m_bot_border_s);
     m_window->draw(m_light.getSprite());
     m_window->draw(m_home.getSprite());
+    m_window->draw(m_swap.getSprite());
     for (auto y = m_lines_hor_s.begin(); y != m_lines_hor_s.end(); ++y)
         m_window->draw(*y);
     for (auto x = m_lines_ver_s.begin(); x != m_lines_ver_s.end(); ++x)

@@ -68,6 +68,7 @@ private:
     GOM::Vector2i m_size;
     Button m_home;
     Button m_light;
+    Button m_swap;
     bool m_light_mode;
     bool m_turn;
     std::size_t m_mode;
