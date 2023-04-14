@@ -30,7 +30,7 @@ void Textbox::inputLogic(int t_char_typed)
   if (t_char_typed != DELETE_KEY && t_char_typed != ENTER_KEY &&
       t_char_typed != ESCAPE_KEY)
   {
-    if (t_char_typed > 47 && t_char_typed < 58)
+    if (t_char_typed > 47 && t_char_typed < 58 || t_char_typed == 46)
     {
       m_text << static_cast<char>(t_char_typed);
     }

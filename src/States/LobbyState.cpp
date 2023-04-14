@@ -1,6 +1,13 @@
-#include "ModeSelectLocal.hpp"
+/*
+** EPITECH PROJECT, 2023
+** Gomoku
+** File description:
+** LobbyState
+*/
 
-void ModeSelectLocal::initSprites()
+#include "LobbyState.hpp"
+
+void LobbyState::initSprites()
 {
     float size_x = m_window->getSize().x;
     float size_y = m_window->getSize().y;
@@ -16,7 +23,7 @@ void ModeSelectLocal::initSprites()
     m_bg_s->setScale({scale_x, scale_y});
 }
 
-void ModeSelectLocal::initText()
+void LobbyState::initText()
 {
     float size_x = m_window->getSize().x;
     float size_y = m_window->getSize().y;
@@ -27,25 +34,21 @@ void ModeSelectLocal::initText()
     }
     m_title = m_graphic_loader->loadText();
     m_title->setFont(m_font);
-    m_title->setString("SELECT MODE");
+    m_title->setString("LOBBY");
     m_title->setCharacterSize(50);
     m_title->setPosition(
         {(size_x / 2) - (m_title->getLocalBounds().width / 2), 100});
     m_title->setColor(GOM::EpiBlue);
 }
 
-ModeSelectLocal::ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
-                                 GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace,
-                                 Host *t_host, Client *t_client)
+LobbyState::LobbyState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
+                       GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace,
+                       Host *t_host, Client *t_client)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace, t_host, t_client),
-      m_pvp(Button("./assets/sprites/BTN/button_p-vs-p.png",
-                   GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 250),
-                                 static_cast<float>(m_window->getSize().y / 2 + 150)},
-                   GOM::Vector2f{150, 50}, t_graphic_loader, false)),
-      m_pve((Button("./assets/sprites/BTN/button_p-vs-ai.png",
-                    GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 + 100),
-                                  static_cast<float>(m_window->getSize().y / 2 + 150)},
-                    GOM::Vector2f{150, 50}, t_graphic_loader, false))),
+      m_start(Button("./assets/icons/buttonStart.png",
+                     GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 50),
+                                   static_cast<float>(m_window->getSize().y / 2 + 150)},
+                     GOM::Vector2f{100, 100}, t_graphic_loader, true)),
       m_home((Button("./assets/icons/home.png",
                      GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 32),
                                    static_cast<float>(m_window->getSize().y - 100)},
@@ -55,13 +58,14 @@ ModeSelectLocal::ModeSelectLocal(StateMachine &t_machine, GOM::IRenderWindow *t_
     m_mode = t_mode;
     initSprites();
     initText();
+    m_host = new Host(m_io_service, 5555);
 }
 
-ModeSelectLocal::~ModeSelectLocal()
+LobbyState::~LobbyState()
 {
 }
 
-void ModeSelectLocal::update()
+void LobbyState::update()
 {
     for (auto event = GOM::Event{}; m_window->pollEvent(event);)
     {
@@ -70,30 +74,24 @@ void ModeSelectLocal::update()
                                   static_cast<float>(mouse_pos.y)};
         if (event.type == GOM::EventType::MouseMoved)
         {
-            m_pvp.is_hovered(mouse_pos_f);
-            m_pve.is_hovered(mouse_pos_f);
             m_home.is_hovered(mouse_pos_f);
+            m_start.is_hovered(mouse_pos_f);
         }
         if (m_mouse->isLeftMouseButtonPressed())
         {
-            if (m_pvp.is_pressed(mouse_pos_f))
-            {
-                std::cout << "pvp btn pressed" << std::endl;
-                m_next = StateMachine::build<GameState>(
-                    m_state_machine, m_window, 0, m_graphic_loader, m_size, true);
-            }
-            if (m_pve.is_pressed(mouse_pos_f))
-            {
-                std::cout << "pve btn pressed" << std::endl;
-            }
             if (m_home.is_pressed(mouse_pos_f))
             {
-                std::cout << "home btn pressed" << std::endl;
+                std::cout << "local btn pressed" << std::endl;
                 m_next = StateMachine::build<MainState>(
                     m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
+            if (m_start.is_pressed(mouse_pos_f) && m_host->is_connected())
+            {
+                std::cout << "start btn pressed" << std::endl;
+                // m_next = StateMachine::build<GameStateMulti>(
+                //     m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true, m_host);
+            }
         }
-
         switch (event.type)
         {
         case GOM::EventType::Closed:
@@ -105,13 +103,13 @@ void ModeSelectLocal::update()
     }
 }
 
-void ModeSelectLocal::draw()
+void LobbyState::draw()
 {
     m_window->clear();
     m_window->draw(m_bg_s);
     m_window->draw(m_title);
-    m_window->draw(m_pve.getSprite());
-    m_window->draw(m_pvp.getSprite());
     m_window->draw(m_home.getSprite());
+    if (m_host->is_connected())
+        m_window->draw(m_start.getSprite());
     m_window->display();
 }

@@ -8,8 +8,7 @@ void SettingsState::initSprites()
     m_bg_s = m_graphic_loader->loadSprite();
     m_bg_txt_sel_t = m_graphic_loader->loadTexture();
     m_bg_txt_t = m_graphic_loader->loadTexture();
-    m_bg_width_s = m_graphic_loader->loadSprite();
-    m_bg_height_s = m_graphic_loader->loadSprite();
+    m_bg_size_s = m_graphic_loader->loadSprite();
     m_bg_txt_sel_s = m_graphic_loader->loadSprite();
     if (!m_bg_t->loadFromFile("./assets/sprites/BG-Main.jpg"))
     {
@@ -27,8 +26,7 @@ void SettingsState::initSprites()
     float scale_y = size_y / m_bg_t->getSize().y;
     m_bg_s->setTexture(m_bg_t, true);
     m_bg_s->setScale({scale_x, scale_y});
-    m_bg_width_s->setTexture(m_bg_txt_t, true);
-    m_bg_height_s->setTexture(m_bg_txt_t, true);
+    m_bg_size_s->setTexture(m_bg_txt_t, true);
     m_bg_txt_sel_s->setTexture(m_bg_txt_sel_t, true);
 }
 
@@ -55,41 +53,30 @@ void SettingsState::initText()
     m_instructions->setPosition(
         {(size_x / 2) - (m_instructions->getLocalBounds().width / 2), (size_y / 2) - 100});
     m_instructions->setColor(GOM::EpiBlue);
-    m_txt_width = m_graphic_loader->loadText();
-    m_txt_width->setFont(m_font);
-    m_txt_width->setString("WIDTH:");
-    m_txt_width->setCharacterSize(30);
-    m_txt_width->setPosition(
-        {(size_x / 2) - (m_txt_width->getLocalBounds().width + 200), (size_y / 2)});
-    m_txt_width->setColor(GOM::EpiBlue);
-    m_txt_height = m_graphic_loader->loadText();
-    m_txt_height->setFont(m_font);
-    m_txt_height->setString("HEIGHT:");
-    m_txt_height->setCharacterSize(30);
-    m_txt_height->setPosition(
-        {(size_x / 2) + (100), (size_y / 2)});
-    m_txt_height->setColor(GOM::EpiBlue);
-    m_width.setLimit(true, 2);
-    m_height.setLimit(true, 2);
-    m_width.setPosition({m_txt_width->getPosition().x + m_txt_width->getLocalBounds().width + 10, (size_y / 2)});
-    m_height.setPosition({m_txt_height->getPosition().x + m_txt_height->getLocalBounds().width + 10, (size_y / 2)});
+    m_txt_size = m_graphic_loader->loadText();
+    m_txt_size->setFont(m_font);
+    m_txt_size->setString("SIZE:");
+    m_txt_size->setCharacterSize(30);
+    m_txt_size->setPosition(
+        {(size_x / 2) - (m_txt_size->getLocalBounds().width / 2), (size_y / 2)});
+    m_txt_size->setColor(GOM::EpiBlue);
+    m_tb_size.setLimit(true, 2);
+    m_tb_size.setPosition({m_txt_size->getPosition().x + m_txt_size->getLocalBounds().width + 10, (size_y / 2)});
 
-    m_bg_width_s->setScale({(m_txt_width->getLocalBounds().width + 64) / m_bg_txt_t->getSize().x, (m_txt_width->getLocalBounds().height + 20) / m_bg_txt_t->getSize().y});
-    m_bg_height_s->setScale({(m_txt_height->getLocalBounds().width + 64) / m_bg_txt_t->getSize().x, (m_txt_height->getLocalBounds().height + 20) / m_bg_txt_t->getSize().y});
+    m_bg_size_s->setScale({(m_txt_size->getLocalBounds().width + 64) / m_bg_txt_t->getSize().x, (m_txt_size->getLocalBounds().height + 20) / m_bg_txt_t->getSize().y});
 
-    m_bg_width_s->setPosition({m_txt_width->getPosition().x - 10, (size_y / 2)});
-    m_bg_height_s->setPosition({m_txt_height->getPosition().x - 10, (size_y / 2)});
+    m_bg_size_s->setPosition({m_txt_size->getPosition().x - 10, (size_y / 2)});
 }
 
 SettingsState::SettingsState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
-                             GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, bool t_replace)
-    : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
+                             GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace,
+                             Host *t_host, Client *t_client)
+    : State(t_machine, t_window, t_graphic_loader, t_size, t_replace, t_host, t_client),
       m_home(Button("./assets/icons/home.png",
                     GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 32),
                                   static_cast<float>(m_window->getSize().y - 74)},
                     GOM::Vector2f{64, 64}, t_graphic_loader, true)),
-      m_height(Textbox(30, GOM::EpiBlue, false, t_graphic_loader)),
-      m_width(Textbox(30, GOM::EpiBlue, false, t_graphic_loader))
+      m_tb_size(Textbox(30, GOM::EpiBlue, false, t_graphic_loader))
 {
     m_size = t_size;
     m_mode = t_mode;
@@ -121,19 +108,12 @@ void SettingsState::update()
                 m_next = StateMachine::build<MainState>(
                     m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
-            if (m_bg_width_s->contains(mouse_pos_f) && !m_height.getSelected())
+            if (m_bg_size_s->contains(mouse_pos_f) && !m_tb_size.getSelected())
             {
-                std::cout << "width pressed" << std::endl;
-                m_bg_txt_sel_s->setScale({(m_txt_width->getLocalBounds().width + 64) / m_bg_txt_t->getSize().x, (m_txt_width->getLocalBounds().height + 20) / m_bg_txt_t->getSize().y});
-                m_bg_txt_sel_s->setPosition({m_txt_width->getPosition().x - 10, (size_y / 2)});
-                m_width.setSelected(true);
-            }
-            if (m_bg_height_s->contains(mouse_pos_f) && !m_width.getSelected())
-            {
-                std::cout << "height pressed" << std::endl;
-                m_bg_txt_sel_s->setScale({(m_txt_height->getLocalBounds().width + 64) / m_bg_txt_t->getSize().x, (m_txt_height->getLocalBounds().height + 20) / m_bg_txt_t->getSize().y});
-                m_bg_txt_sel_s->setPosition({m_txt_height->getPosition().x - 10, (size_y / 2)});
-                m_height.setSelected(true);
+                std::cout << "size pressed" << std::endl;
+                m_bg_txt_sel_s->setScale({(m_txt_size->getLocalBounds().width + 64) / m_bg_txt_t->getSize().x, (m_txt_size->getLocalBounds().height + 20) / m_bg_txt_t->getSize().y});
+                m_bg_txt_sel_s->setPosition({m_txt_size->getPosition().x - 10, (size_y / 2)});
+                m_tb_size.setSelected(true);
             }
         }
 
@@ -146,38 +126,23 @@ void SettingsState::update()
             switch (event.key)
             {
             case GOM::EventKey::Enter:
-                if (m_height.getSelected())
+                if (m_tb_size.getSelected())
                 {
-                    int tmp_height = std::atoi(m_height.getTextString().c_str());
-                    int tmp_width = m_size.x;
-                    if (tmp_height > 4 && tmp_height < 21)
+                    int tmp_size = std::atoi(m_tb_size.getTextString().c_str());
+                    if (tmp_size > 4 && tmp_size < 21)
                     {
-                        m_size = {tmp_width, tmp_height};
+                        m_size = tmp_size;
                     }
-                    m_height.setSelected(false);
-                }
-                if (m_width.getSelected())
-                {
-                    int tmp_height = m_size.y;
-                    int tmp_width = std::atoi(m_width.getTextString().c_str());
-                    if (tmp_width > 4 && tmp_width < 21)
-                    {
-                        m_size = {tmp_width, tmp_height};
-                    }
-                    m_width.setSelected(false);
+                    m_tb_size.setSelected(false);
                 }
             default:
                 break;
             }
             break;
         case GOM::EventType::TextEntered:
-            if (m_width.getSelected())
+            if (m_tb_size.getSelected())
             {
-                m_width.typedOn(event);
-            }
-            else if (m_height.getSelected())
-            {
-                m_height.typedOn(event);
+                m_tb_size.typedOn(event);
             }
             break;
         default:
@@ -192,18 +157,12 @@ void SettingsState::draw()
     m_window->draw(m_bg_s);
     m_window->draw(m_title);
     m_window->draw(m_instructions);
-    if (m_height.getSelected())
+    if (m_tb_size.getSelected())
         m_window->draw(m_bg_txt_sel_s);
     else
-        m_window->draw(m_bg_height_s);
-    if (m_width.getSelected())
-        m_window->draw(m_bg_txt_sel_s);
-    else
-        m_window->draw(m_bg_width_s);
-    m_window->draw(m_width.getText());
-    m_window->draw(m_height.getText());
-    m_window->draw(m_txt_height);
-    m_window->draw(m_txt_width);
+        m_window->draw(m_bg_size_s);
+    m_window->draw(m_tb_size.getText());
+    m_window->draw(m_txt_size);
     m_window->draw(m_home.getSprite());
     m_window->display();
 }

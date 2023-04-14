@@ -1,5 +1,5 @@
-#ifndef MAINSTATE_HPP_
-#define MAINSTATE_HPP_
+#ifndef LOBBYSTATE_HPP_
+#define LOBBYSTATE_HPP_
 
 #include <iostream>
 
@@ -13,36 +13,36 @@
 #include "../StateMachine/State.hpp"
 #include "../StateMachine/StateMachine.hpp"
 
-#include "ModeSelectLocal.hpp"
-#include "SettingsState.hpp"
-#include "LobbyState.hpp"
-#include "JoinLobbyState.hpp"
+#include "../Networking/Host.hpp"
 
-class MainState final : public State
+#include "ModeSelectLocal.hpp"
+#include "MainState.hpp"
+// #include "GameStateMulti.hpp"
+
+class LobbyState final : public State
 {
 public:
-    MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
-              GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace = true,
-              Host *t_host = nullptr, Client *t_client = nullptr);
-    ~MainState();
+    LobbyState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
+               GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace = true,
+               Host *t_host = nullptr, Client *t_client = nullptr);
+    ~LobbyState();
     void update() override;
     void draw() override;
 
 private:
+    Host *m_host;
     GOM::ITexture *m_bg_t;
     GOM::ISprite *m_bg_s;
     GOM::IFont *m_font;
     GOM::IText *m_title;
-    Button m_local;
-    Button m_host;
-    Button m_join;
-    Button m_settings;
-    Button m_exit;
+    Button m_start;
+    Button m_home;
     int m_size;
     std::size_t m_mode;
+    boost::asio::io_service m_io_service;
 
     void initSprites();
     void initText();
 };
 
-#endif //! MAINSTATE_HPP_
+#endif /* !LOBBYSTATE_HPP_ */

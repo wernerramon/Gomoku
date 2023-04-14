@@ -1,6 +1,6 @@
-#include "GameState.hpp"
+#include "GameStateMulti.hpp"
 
-void GameState::initGrit()
+void GameStateMulti::initGrit()
 {
     float pos_y = 100;
     float pos_x = 0;
@@ -32,7 +32,7 @@ void GameState::initGrit()
     }
 }
 
-void GameState::initSprites()
+void GameStateMulti::initSprites()
 {
     float size_x = m_window->getSize().x;
     float size_y = m_window->getSize().y;
@@ -124,7 +124,7 @@ void GameState::initSprites()
     m_icon_p2->setColor(GOM::Red);
 }
 
-void GameState::initText()
+void GameStateMulti::initText()
 {
     float size_x = m_window->getSize().x;
     float size_y = m_window->getSize().y;
@@ -207,9 +207,9 @@ void GameState::initText()
     m_icon_p2->setPosition({(size_x * 0.75f) - 20, 865 + m_p2_name->getLocalBounds().height});
 }
 
-GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
-                     GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace,
-                     Host *t_host, Client *t_client)
+GameStateMulti::GameStateMulti(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
+                               GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace,
+                               Host *t_host, Client *t_client)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace, t_host, t_client),
       m_home(Button("./assets/icons/home.png",
                     GOM::Vector2f{10, 10},
@@ -252,11 +252,11 @@ GameState::GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std:
     initGrit();
 }
 
-GameState::~GameState()
+GameStateMulti::~GameStateMulti()
 {
 }
 
-bool GameState::isEmpty(GOM::Vector2f t_pos)
+bool GameStateMulti::isEmpty(GOM::Vector2f t_pos)
 {
     for (int i = 0; i < m_cross_s.size(); i++)
     {
@@ -275,7 +275,7 @@ bool GameState::isEmpty(GOM::Vector2f t_pos)
     return true;
 }
 
-void GameState::createIcon(GOM::Vector2f t_mouse_pos)
+void GameStateMulti::createIcon(GOM::Vector2f t_mouse_pos)
 {
     GOM::Vector2f pos = {0, 0};
     GOM::Vector2i coord = {0, 0};
@@ -333,7 +333,7 @@ void GameState::createIcon(GOM::Vector2f t_mouse_pos)
     }
 }
 
-int GameState::check_win_or_draw(const std::vector<std::vector<int>> &board)
+int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board)
 {
     // check horzontal win
     for (const auto &row : board)
@@ -426,7 +426,7 @@ int GameState::check_win_or_draw(const std::vector<std::vector<int>> &board)
     return 0;
 }
 
-void GameState::update()
+void GameStateMulti::update()
 {
     if (m_turn)
     {
@@ -575,7 +575,7 @@ void GameState::update()
     }
 }
 
-void GameState::draw()
+void GameStateMulti::draw()
 {
     m_window->clear();
     m_window->draw(m_bg_s);

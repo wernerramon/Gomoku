@@ -8,13 +8,17 @@
 #include "../Encapsulation/IMouse.hpp"
 #include "../Encapsulation/IGraphicLoader.hpp"
 
+#include "../Networking/Host.hpp"
+#include "../Networking/Client.hpp"
+
 class StateMachine;
 
 class State
 {
 public:
     State(StateMachine &t_machine, GOM::IRenderWindow *t_window,
-          GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, const bool t_replace);
+          GOM::IGraphicLoader *t_graphic_loader, int t_size, const bool t_replace,
+          Host *t_host = nullptr, Client *t_client = nullptr);
 
     virtual ~State() = default;
 
@@ -35,6 +39,8 @@ protected:
     bool m_replace;
     std::unique_ptr<State> m_next;
     GOM::IGraphicLoader *m_graphic_loader;
+    Host *m_host = nullptr;
+    Client *m_client = nullptr;
 };
 
 #endif // !STATE_HPP_

@@ -1,10 +1,12 @@
-#ifndef GAMESTATE_HPP_
-#define GAMESTATE_HPP_
+#ifndef GAMESTATEMULTI_HPP_
+#define GAMESTATEMULTI_HPP_
 
 #include <algorithm>
 #include <iostream>
 #include <math.h>
 #include <vector>
+
+#include "../Action/Action.hpp"
 
 #include "../Encapsulation/ITexture.hpp"
 #include "../Encapsulation/ISprite.hpp"
@@ -13,22 +15,34 @@
 
 #include "../Components/Button.hpp"
 
+#include "../Networking/Client.hpp"
+#include "../Networking/Host.hpp"
+
 #include "../StateMachine/State.hpp"
 #include "../StateMachine/StateMachine.hpp"
 
 #include "./MainState.hpp"
 
-class GameState final : public State
+class GameStateMulti final : public State
 {
 public:
-    GameState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
-              GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace = true,
-              Host *t_host = nullptr, Client *t_client = nullptr);
-    ~GameState();
+    GameStateMulti(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
+                   GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace = true,
+                   Host *t_host = nullptr, Client *t_client = nullptr);
+    ~GameStateMulti();
     void update() override;
     void draw() override;
 
 private:
+    enum ComFlag
+    {
+        host,
+        client
+    };
+    std::size_t m_port_nb;
+    ComFlag m_flag;
+    bool is_running;
+
     GOM::ITexture *m_bg_border_light_t;
     GOM::ITexture *m_bg_border_dark_t;
     GOM::ITexture *m_bg_dark_t;
@@ -87,4 +101,4 @@ private:
     int check_win_or_draw(const std::vector<std::vector<int>> &board);
 };
 
-#endif /* !GAMESTATE_HPP_ */
+#endif /* !GAMESTATEMULTI_HPP_ */

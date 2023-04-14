@@ -35,16 +35,21 @@ void MainState::initText()
 }
 
 MainState::MainState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
-                     GOM::IGraphicLoader *t_graphic_loader, GOM::Vector2i t_size, const bool t_replace)
-    : State(t_machine, t_window, t_graphic_loader, t_size, t_replace),
+                     GOM::IGraphicLoader *t_graphic_loader, int t_size, const bool t_replace,
+                     Host *t_host, Client *t_client)
+    : State(t_machine, t_window, t_graphic_loader, t_size, t_replace, t_host, t_client),
       m_local(Button("./assets/sprites/BTN/button_local.png",
                      GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 250),
                                    static_cast<float>(m_window->getSize().y / 2 + 150)},
                      GOM::Vector2f{150, 50}, t_graphic_loader, false)),
-      m_online((Button("./assets/sprites/BTN/button_online.png",
-                       GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 + 100),
-                                     static_cast<float>(m_window->getSize().y / 2 + 150)},
-                       GOM::Vector2f{150, 50}, t_graphic_loader, false))),
+      m_host((Button("./assets/sprites/BTN/button_host.png",
+                     GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 + 100),
+                                   static_cast<float>(m_window->getSize().y / 2 + 150)},
+                     GOM::Vector2f{150, 50}, t_graphic_loader, false))),
+      m_join((Button("./assets/sprites/BTN/button_join.png",
+                     GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 + 100),
+                                   static_cast<float>(m_window->getSize().y / 2 + 250)},
+                     GOM::Vector2f{150, 50}, t_graphic_loader, false))),
       m_settings(Button("./assets/icons/gear.png",
                         GOM::Vector2f{static_cast<float>(m_window->getSize().x - 200),
                                       static_cast<float>(m_window->getSize().y - 100)},
@@ -76,7 +81,8 @@ void MainState::update()
         if (event.type == GOM::EventType::MouseMoved)
         {
             m_local.is_hovered(mouse_pos_f);
-            m_online.is_hovered(mouse_pos_f);
+            m_host.is_hovered(mouse_pos_f);
+            m_join.is_hovered(mouse_pos_f);
             m_settings.is_hovered(mouse_pos_f);
             m_exit.is_hovered(mouse_pos_f);
         }
@@ -88,9 +94,17 @@ void MainState::update()
                 m_next = StateMachine::build<ModeSelectLocal>(
                     m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
-            if (m_online.is_pressed(mouse_pos_f))
+            if (m_host.is_pressed(mouse_pos_f))
             {
-                std::cout << "online btn pressed" << std::endl;
+                std::cout << "host btn pressed" << std::endl;
+                m_next = StateMachine::build<LobbyState>(
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
+            }
+            if (m_join.is_pressed(mouse_pos_f))
+            {
+                std::cout << "join btn pressed" << std::endl;
+                m_next = StateMachine::build<JoinLobbyState>(
+                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
             }
             if (m_settings.is_pressed(mouse_pos_f))
             {
@@ -122,7 +136,8 @@ void MainState::draw()
     m_window->draw(m_bg_s);
     m_window->draw(m_title);
     m_window->draw(m_local.getSprite());
-    m_window->draw(m_online.getSprite());
+    m_window->draw(m_host.getSprite());
+    m_window->draw(m_join.getSprite());
     m_window->draw(m_settings.getSprite());
     m_window->draw(m_exit.getSprite());
     m_window->display();
