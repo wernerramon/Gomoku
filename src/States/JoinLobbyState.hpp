@@ -15,6 +15,7 @@
 #include "../StateMachine/StateMachine.hpp"
 
 #include "../Networking/Host.hpp"
+#include "../Networking/Client.hpp"
 
 #include "ModeSelectLocal.hpp"
 #include "MainState.hpp"
@@ -50,6 +51,7 @@ private:
 
     Button m_start;
     Button m_home;
+    bool m_btn_pressed;
 
     int m_size;
     std::size_t m_mode;

@@ -35,6 +35,7 @@ endif()
 set(GOMOKU_HPP ./src/Action/Action.hpp
                 ./src/Action/IAction.hpp
                 ./src/Components/Button.hpp
+                ./src/Components/SplitMessage.hpp
                 ./src/Components/Textbox.hpp
                 ./src/Components/Timer.hpp
                 ./src/Encapsulation/Event.hpp
@@ -58,11 +59,11 @@ set(GOMOKU_HPP ./src/Action/Action.hpp
                 ./src/Encapsulation/SFML/Texture.hpp
                 ./src/Networking/Client.hpp
                 ./src/Networking/Host.hpp
-                ./src/Networking/Session.hpp
                 ./src/StateMachine/Core.hpp
                 ./src/StateMachine/State.hpp
                 ./src/StateMachine/StateMachine.hpp
                 ./src/States/GameState.hpp
+                ./src/States/GameStateMulti.hpp
                 ./src/States/JoinLobbyState.hpp
                 ./src/States/LobbyState.hpp
                 ./src/States/MainState.hpp
@@ -83,11 +84,11 @@ set(GOMOKU_CPP ./src/Action/Action.cpp
                 ./src/Encapsulation/SFML/Texture.cpp
                 ./src/Networking/Client.cpp
                 ./src/Networking/Host.cpp
-                ./src/Networking/Session.cpp
                 ./src/StateMachine/Core.cpp
                 ./src/StateMachine/State.cpp
                 ./src/StateMachine/StateMachine.cpp
                 ./src/States/GameState.cpp
+                ./src/States/GameStateMulti.cpp
                 ./src/States/JoinLobbyState.cpp
                 ./src/States/LobbyState.cpp
                 ./src/States/MainState.cpp
@@ -99,7 +100,7 @@ set(GOMOKU_CPP ./src/Action/Action.cpp
 add_executable(gomoku ${GOMOKU_CPP} ${GOMOKU_HPP})
 
 # Link with Boost.Asio and SFML libraries
-target_link_libraries(gomoku Boost::system Boost::thread sfml-graphics sfml-window sfml-system)
+target_link_libraries(gomoku Boost::system Boost::thread sfml-graphics sfml-window sfml-system -g3)
 
 # Set output directory based on operating system
 if(UNIX)

@@ -87,6 +87,7 @@ private:
     bool m_light_mode;
     bool m_turn;
     std::size_t m_mode;
+
     int m_score_p1;
     int m_score_p2;
     int m_move_count;

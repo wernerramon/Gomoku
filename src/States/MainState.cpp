@@ -98,13 +98,13 @@ void MainState::update()
             {
                 std::cout << "host btn pressed" << std::endl;
                 m_next = StateMachine::build<LobbyState>(
-                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, 1, m_graphic_loader, m_size, true);
             }
             if (m_join.is_pressed(mouse_pos_f))
             {
                 std::cout << "join btn pressed" << std::endl;
                 m_next = StateMachine::build<JoinLobbyState>(
-                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
+                    m_state_machine, m_window, 2, m_graphic_loader, m_size, true);
             }
             if (m_settings.is_pressed(mouse_pos_f))
             {

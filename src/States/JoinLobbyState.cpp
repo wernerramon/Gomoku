@@ -80,10 +80,10 @@ JoinLobbyState::JoinLobbyState(StateMachine &t_machine, GOM::IRenderWindow *t_wi
                                GOM::IGraphicLoader *t_graphic_loader, int t_size, bool t_replace,
                                Host *t_host, Client *t_client)
     : State(t_machine, t_window, t_graphic_loader, t_size, t_replace, t_host, t_client),
-      m_start(Button("./assets/icons/buttonStart.png",
-                     GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 50),
+      m_start(Button("./assets/sprites/BTN/button_join.png",
+                     GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 75),
                                    static_cast<float>(m_window->getSize().y / 2 + 150)},
-                     GOM::Vector2f{100, 100}, t_graphic_loader, true)),
+                     GOM::Vector2f{150, 50}, t_graphic_loader, false)),
       m_home((Button("./assets/icons/home.png",
                      GOM::Vector2f{static_cast<float>(m_window->getSize().x / 2 - 32),
                                    static_cast<float>(m_window->getSize().y - 100)},
@@ -91,6 +91,7 @@ JoinLobbyState::JoinLobbyState(StateMachine &t_machine, GOM::IRenderWindow *t_wi
       m_tb_host_ip(Textbox(25, GOM::EpiBlue, false, t_graphic_loader)),
       m_tb_host_port(Textbox(25, GOM::EpiBlue, false, t_graphic_loader))
 {
+    m_btn_pressed = false;
     m_size = t_size;
     m_mode = t_mode;
     initSprites();
@@ -136,6 +137,28 @@ void JoinLobbyState::update()
                 m_bg_txt_sel_s->setPosition({m_title_port->getPosition().x - 10, (size_y / 2)});
                 m_tb_host_port.setSelected(true);
             }
+            if (m_start.is_pressed(mouse_pos_f) && !m_btn_pressed)
+            {
+                std::cout << m_host_ip << std::endl;
+                m_client = new Client(m_io_service, m_host_ip, static_cast<unsigned short>(std::stoi(m_host_port)));
+                while (!m_client->isConnected())
+                {
+                    m_io_service.poll();
+                }
+                m_client->send_message("ok");
+                m_btn_pressed = true;
+            }
+            if (m_client != nullptr)
+            {
+                std::cout << m_client->getStartGame() << std::endl;
+                if (m_client->getStartGame())
+                {
+                    m_size = m_client->getBoardSize();
+                    std::cout << m_size << std::endl;
+                    m_next = StateMachine::build<GameStateMulti>(
+                        m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true, nullptr, m_client);
+                }
+            }
         }
 
         switch (event.type)
@@ -156,6 +179,11 @@ void JoinLobbyState::update()
                 {
                     m_host_port = m_tb_host_port.getTextString();
                     m_tb_host_port.setSelected(false);
+                }
+            case GOM::EventKey::Space:
+                if (m_client != nullptr)
+                {
+                    m_client->send_message("test from client");
                 }
             default:
                 break;

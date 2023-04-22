@@ -2,6 +2,7 @@
 #define LOBBYSTATE_HPP_
 
 #include <iostream>
+#include <cstdlib>
 
 #include "../Encapsulation/ITexture.hpp"
 #include "../Encapsulation/ISprite.hpp"
@@ -17,7 +18,7 @@
 
 #include "ModeSelectLocal.hpp"
 #include "MainState.hpp"
-// #include "GameStateMulti.hpp"
+#include "GameStateMulti.hpp"
 
 class LobbyState final : public State
 {
@@ -31,16 +32,23 @@ public:
 
 private:
     Host *m_host;
+
     GOM::ITexture *m_bg_t;
     GOM::ISprite *m_bg_s;
+
     GOM::IFont *m_font;
     GOM::IText *m_title;
+    GOM::IText *m_txt_port;
+
     Button m_start;
     Button m_home;
+    bool m_btn_pressed;
+
     int m_size;
     std::size_t m_mode;
     boost::asio::io_service m_io_service;
 
+    bool is_running;
     void initSprites();
     void initText();
 };

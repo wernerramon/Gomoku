@@ -221,6 +221,7 @@ GameStateMulti::GameStateMulti(StateMachine &t_machine, GOM::IRenderWindow *t_wi
                      GOM::Vector2f{static_cast<float>(t_window->getSize().x) - 74, 10},
                      GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
+    is_running = true;
     m_size = t_size;
     for (int y = 0; y < m_size; y++)
     {
@@ -231,9 +232,20 @@ GameStateMulti::GameStateMulti(StateMachine &t_machine, GOM::IRenderWindow *t_wi
         }
         m_board.push_back(tmp);
     }
-    m_light_mode = true;
-    m_turn = true;
     m_mode = t_mode;
+    m_light_mode = true;
+    if (m_mode == 1)
+    {
+        std::cout << "m_turn host " << m_host->getStartingPlayer() << std::endl;
+        m_turn = m_host->getStartingPlayer();
+    }
+    else if (m_mode == 2)
+    {
+        std::cout << "m_turn client" << m_client->getStartingPlayer() << std::endl;
+        m_turn = m_client->getStartingPlayer();
+    }
+    else
+        m_turn = true;
     m_score_p1 = 0;
     m_score_p2 = 0;
     m_move_count = 0;
@@ -246,7 +258,7 @@ GameStateMulti::GameStateMulti(StateMachine &t_machine, GOM::IRenderWindow *t_wi
     {
         m_is_host = false;
     }
-
+    std::cout << "m_is_host " << m_is_host << std::endl;
     initSprites();
     initText();
     initGrit();
@@ -279,8 +291,9 @@ void GameStateMulti::createIcon(GOM::Vector2f t_mouse_pos)
 {
     GOM::Vector2f pos = {0, 0};
     GOM::Vector2i coord = {0, 0};
-    if (m_turn)
+    if (m_turn && m_is_host)
     {
+        std::cout << "host places x" << std::endl;
         for (int i = 0; i < m_size; i++)
         {
             if (t_mouse_pos.x > i * 37 && t_mouse_pos.x < (i + 1) * 37)
@@ -304,9 +317,15 @@ void GameStateMulti::createIcon(GOM::Vector2f t_mouse_pos)
         tmp->setColor(GOM::Blue);
         m_board[coord.y][coord.x] = 1;
         m_cross_s.push_back(tmp);
+        if (m_mode == 1)
+        {
+            m_host->send_turn('X', coord.x, coord.y);
+        }
+        std::cout << "finished turn X\n";
     }
-    else
+    else if (!m_turn && !m_is_host)
     {
+        std::cout << "client places O" << std::endl;
         for (int i = 0; i < m_size; i++)
         {
             if (t_mouse_pos.x > i * 37 && t_mouse_pos.x < (i + 1) * 37)
@@ -330,6 +349,10 @@ void GameStateMulti::createIcon(GOM::Vector2f t_mouse_pos)
         tmp->setColor(GOM::Red);
         m_board[coord.y][coord.x] = 2;
         m_circle_s.push_back(tmp);
+        if (m_mode == 2)
+        {
+            m_client->send_turn('X', coord.x, coord.y);
+        }
     }
 }
 
@@ -343,10 +366,14 @@ int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board
         {
             if (row[i] == 1 && row[i] == row[i + 1] && row[i] == row[i + 2] && row[i] == row[i + 3] && row[i] == row[i + 4])
             {
+                if (m_mode == 1)
+                    m_host->send_win('X');
                 return 1;
             }
             if (row[i] == 2 && row[i] == row[i + 1] && row[i] == row[i + 2] && row[i] == row[i + 3] && row[i] == row[i + 4])
             {
+                if (m_mode == 1)
+                    m_host->send_win('O');
                 return 2;
             }
         }
@@ -359,11 +386,15 @@ int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board
             if (board[row][col] == 1 && board[row][col] == board[row + 1][col] && board[row][col] == board[row + 2][col] &&
                 board[row][col] == board[row + 3][col] && board[row][col] == board[row + 4][col])
             {
+                if (m_mode == 1)
+                    m_host->send_win('X');
                 return 1;
             }
             if (board[row][col] == 2 && board[row][col] == board[row + 1][col] && board[row][col] == board[row + 2][col] &&
                 board[row][col] == board[row + 3][col] && board[row][col] == board[row + 4][col])
             {
+                if (m_mode == 1)
+                    m_host->send_win('O');
                 return 2;
             }
         }
@@ -376,11 +407,15 @@ int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board
             if (board[row][col] == 1 && board[row][col] == board[row + 1][col + 1] && board[row][col] == board[row + 2][col + 2] &&
                 board[row][col] == board[row + 3][col + 3] && board[row][col] == board[row + 4][col + 4])
             {
+                if (m_mode == 1)
+                    m_host->send_win('X');
                 return 1;
             }
             if (board[row][col] == 2 && board[row][col] == board[row + 1][col + 1] && board[row][col] == board[row + 2][col + 2] &&
                 board[row][col] == board[row + 3][col + 3] && board[row][col] == board[row + 4][col + 4])
             {
+                if (m_mode == 1)
+                    m_host->send_win('O');
                 return 2;
             }
         }
@@ -394,11 +429,15 @@ int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board
             if (board[row][col] == 1 && board[row][col] == board[row + 1][col - 1] && board[row][col] == board[row + 2][col - 2] &&
                 board[row][col] == board[row + 3][col - 3] && board[row][col] == board[row + 4][col - 4])
             {
+                if (m_mode == 1)
+                    m_host->send_win('X');
                 return 1;
             }
             if (board[row][col] == 2 && board[row][col] == board[row + 1][col - 1] && board[row][col] == board[row + 2][col - 2] &&
                 board[row][col] == board[row + 3][col - 3] && board[row][col] == board[row + 4][col - 4])
             {
+                if (m_mode == 1)
+                    m_host->send_win('O');
                 return 2;
             }
         }
@@ -421,6 +460,8 @@ int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board
     }
     if (is_draw)
     {
+        if (m_mode == 1)
+            m_host->send_draw();
         return 3; // Draw
     }
     return 0;
@@ -428,150 +469,155 @@ int GameStateMulti::check_win_or_draw(const std::vector<std::vector<int>> &board
 
 void GameStateMulti::update()
 {
-    if (m_turn)
+    while (is_running)
     {
-        m_p1_name->setColor(GOM::EpiBlue);
-        m_p2_name->setColor(GOM::White);
-    }
-    else
-    {
-        m_p2_name->setColor(GOM::EpiBlue);
-        m_p1_name->setColor(GOM::White);
-    }
-    for (auto event = GOM::Event{}; m_window->pollEvent(event);)
-    {
-        GOM::Vector2i mouse_pos = m_mouse->getMousePosition(m_window);
-        GOM::Vector2f mouse_pos_f{static_cast<float>(mouse_pos.x),
-                                  static_cast<float>(mouse_pos.y)};
-        if (event.type == GOM::EventType::MouseMoved)
+        if (m_turn)
         {
-            m_home.is_hovered(mouse_pos_f);
-            m_light.is_hovered(mouse_pos_f);
-            m_swap.is_hovered(mouse_pos_f);
+            m_p1_name->setColor(GOM::EpiBlue);
+            m_p2_name->setColor(GOM::White);
         }
-        if (m_mouse->isLeftMouseButtonPressed())
+        else
         {
-            if (m_light.is_pressed(mouse_pos_f))
+            m_p2_name->setColor(GOM::EpiBlue);
+            m_p1_name->setColor(GOM::White);
+        }
+        for (auto event = GOM::Event{}; m_window->pollEvent(event);)
+        {
+            GOM::Vector2i mouse_pos = m_mouse->getMousePosition(m_window);
+            GOM::Vector2f mouse_pos_f{static_cast<float>(mouse_pos.x),
+                                      static_cast<float>(mouse_pos.y)};
+            if (event.type == GOM::EventType::MouseMoved)
             {
-                std::cout << "light btn pressed" << std::endl;
-                if (m_light_mode)
+                m_home.is_hovered(mouse_pos_f);
+                m_light.is_hovered(mouse_pos_f);
+                m_swap.is_hovered(mouse_pos_f);
+            }
+            if (m_mouse->isLeftMouseButtonPressed())
+            {
+                if (m_light.is_pressed(mouse_pos_f))
                 {
-                    m_light_mode = false;
-                    m_bg_s->setTexture(m_bg_dark_t, true);
-                    m_top_border_s->setTexture(m_bg_border_dark_t, true);
-                    m_bot_border_s->setTexture(m_bg_border_dark_t, true);
-                    m_bg_restart_s->setTexture(m_bg_border_dark_t, true);
-                    for (int i = 0; i < m_lines_hor_s.size(); i++)
+                    std::cout << "light btn pressed" << std::endl;
+                    if (m_light_mode)
                     {
-                        m_lines_hor_s[i]->setTexture(m_line_dark_hor_t, true);
+                        m_light_mode = false;
+                        m_bg_s->setTexture(m_bg_dark_t, true);
+                        m_top_border_s->setTexture(m_bg_border_dark_t, true);
+                        m_bot_border_s->setTexture(m_bg_border_dark_t, true);
+                        m_bg_restart_s->setTexture(m_bg_border_dark_t, true);
+                        for (int i = 0; i < m_lines_hor_s.size(); i++)
+                        {
+                            m_lines_hor_s[i]->setTexture(m_line_dark_hor_t, true);
+                        }
+                        for (int i = 0; i < m_lines_ver_s.size(); i++)
+                        {
+                            m_lines_ver_s[i]->setTexture(m_line_dark_ver_t, true);
+                        }
                     }
-                    for (int i = 0; i < m_lines_ver_s.size(); i++)
+                    else
                     {
-                        m_lines_ver_s[i]->setTexture(m_line_dark_ver_t, true);
+                        m_light_mode = true;
+                        m_bg_s->setTexture(m_bg_light_t, true);
+                        m_top_border_s->setTexture(m_bg_border_light_t, true);
+                        m_bot_border_s->setTexture(m_bg_border_light_t, true);
+                        m_bg_restart_s->setTexture(m_bg_border_light_t, true);
+                        for (int i = 0; i < m_lines_hor_s.size(); i++)
+                        {
+                            m_lines_hor_s[i]->setTexture(m_line_light_hor_t, true);
+                        }
+                        for (int i = 0; i < m_lines_ver_s.size(); i++)
+                        {
+                            m_lines_ver_s[i]->setTexture(m_line_light_ver_t, true);
+                        }
                     }
                 }
-                else
+                if (m_home.is_pressed(mouse_pos_f))
                 {
-                    m_light_mode = true;
-                    m_bg_s->setTexture(m_bg_light_t, true);
-                    m_top_border_s->setTexture(m_bg_border_light_t, true);
-                    m_bot_border_s->setTexture(m_bg_border_light_t, true);
-                    m_bg_restart_s->setTexture(m_bg_border_light_t, true);
-                    for (int i = 0; i < m_lines_hor_s.size(); i++)
-                    {
-                        m_lines_hor_s[i]->setTexture(m_line_light_hor_t, true);
-                    }
-                    for (int i = 0; i < m_lines_ver_s.size(); i++)
-                    {
-                        m_lines_ver_s[i]->setTexture(m_line_light_ver_t, true);
-                    }
+                    std::cout << "home btn pressed" << std::endl;
+                    is_running = false;
+                    m_next = StateMachine::build<MainState>(
+                        m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
                 }
-            }
-            if (m_home.is_pressed(mouse_pos_f))
-            {
-                std::cout << "home btn pressed" << std::endl;
-                m_next = StateMachine::build<MainState>(
-                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
-            }
-            if (m_swap.is_pressed(mouse_pos_f))
-            {
-                if (m_turn)
-                    m_turn = false;
-                else
-                    m_turn = true;
-            }
-            if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size * 37 + 100)
-            {
-                if (isEmpty(mouse_pos_f) && check_win_or_draw(m_board) == 0)
+                if (m_swap.is_pressed(mouse_pos_f) && m_mode == 1)
                 {
-                    createIcon(mouse_pos_f);
                     if (m_turn)
                         m_turn = false;
                     else
                         m_turn = true;
-                    m_move_count++;
-                    m_move->setString("MOVE " + std::to_string(m_move_count));
-                    m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
-                    if (check_win_or_draw(m_board) == 1)
+                }
+                if (mouse_pos_f.x > 0 && mouse_pos_f.x < m_size * 37 && mouse_pos_f.y > 100 && mouse_pos_f.y < m_size * 37 + 100)
+                {
+                    if (isEmpty(mouse_pos_f) && check_win_or_draw(m_board) == 0 && (m_mode == 1 && m_turn) || (m_mode == 2 && !m_turn))
                     {
-
-                        m_winner->setString("PLAYER 1 WON!!!");
-                        m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
-                        std::cout << "Player 1 won!" << std::endl;
-                        m_score_p1++;
-                        m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
-                        m_score->setPosition({m_window->getSize().x / 2 - (m_score->getLocalBounds().width / 2), 855});
-                    }
-                    else if (check_win_or_draw(m_board) == 2)
-                    {
-
-                        m_winner->setString("PLAYER 2 WON!!!");
-                        m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
-                        std::cout << "Player 2 won!" << std::endl;
-                        m_score_p2++;
-                        m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
-                        m_score->setPosition({m_window->getSize().x / 2 - (m_score->getLocalBounds().width / 2), 855});
-                    }
-                    else if (check_win_or_draw(m_board) == 3)
-                    {
-                        m_winner->setString("DRAW");
-                        m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
-                        std::cout << "Draw!" << std::endl;
+                        createIcon(mouse_pos_f);
+                        if (m_turn)
+                            m_turn = false;
+                        else
+                            m_turn = true;
+                        std::cout << "changed turn" << std::endl;
+                        m_move_count++;
+                        m_move->setString("MOVE " + std::to_string(m_move_count));
+                        m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
+                        if (check_win_or_draw(m_board) == 1)
+                        {
+                            m_winner->setString("PLAYER 1 WON!!!");
+                            m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
+                            std::cout << "Player 1 won!" << std::endl;
+                            m_score_p1++;
+                            m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
+                            m_score->setPosition({m_window->getSize().x / 2 - (m_score->getLocalBounds().width / 2), 855});
+                        }
+                        else if (check_win_or_draw(m_board) == 2)
+                        {
+                            m_winner->setString("PLAYER 2 WON!!!");
+                            m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
+                            std::cout << "Player 2 won!" << std::endl;
+                            m_score_p2++;
+                            m_score->setString("SCORE " + std::to_string(m_score_p1) + ":" + std::to_string(m_score_p2));
+                            m_score->setPosition({m_window->getSize().x / 2 - (m_score->getLocalBounds().width / 2), 855});
+                        }
+                        else if (check_win_or_draw(m_board) == 3)
+                        {
+                            m_winner->setString("DRAW");
+                            m_winner->setPosition({m_window->getSize().x / 2 - (m_winner->getLocalBounds().width / 2), m_window->getSize().y / 2 - m_winner->getLocalBounds().height - 10});
+                            std::cout << "Draw!" << std::endl;
+                        }
                     }
                 }
             }
-        }
 
-        switch (event.type)
-        {
-        case GOM::EventType::Closed:
-            m_state_machine.quit();
-            break;
-        case GOM::EventType::KeyPressed:
-            switch (event.key)
+            switch (event.type)
             {
-            case GOM::EventKey::Enter:
-                m_move_count = 0;
-                m_move->setString("MOVE " + std::to_string(m_move_count));
-                m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
-                m_circle_s.clear();
-                m_cross_s.clear();
-                m_board.clear();
-                for (int y = 0; y < m_size; y++)
+            case GOM::EventType::Closed:
+                is_running = false;
+                m_state_machine.quit();
+                break;
+            case GOM::EventType::KeyPressed:
+                switch (event.key)
                 {
-                    std::vector<int> tmp = {};
-                    for (int x = 0; x < m_size; x++)
+                case GOM::EventKey::Enter:
+                    m_move_count = 0;
+                    m_move->setString("MOVE " + std::to_string(m_move_count));
+                    m_move->setPosition({m_window->getSize().x / 2 - (m_move->getLocalBounds().width / 2), 865 + m_score->getLocalBounds().height});
+                    m_circle_s.clear();
+                    m_cross_s.clear();
+                    m_board.clear();
+                    for (int y = 0; y < m_size; y++)
                     {
-                        tmp.push_back(0);
+                        std::vector<int> tmp = {};
+                        for (int x = 0; x < m_size; x++)
+                        {
+                            tmp.push_back(0);
+                        }
+                        m_board.push_back(tmp);
                     }
-                    m_board.push_back(tmp);
+                default:
+                    break;
                 }
             default:
                 break;
             }
-        default:
-            break;
         }
+        draw();
     }
 }
 

@@ -39,6 +39,19 @@ void LobbyState::initText()
     m_title->setPosition(
         {(size_x / 2) - (m_title->getLocalBounds().width / 2), 100});
     m_title->setColor(GOM::EpiBlue);
+    m_txt_port = m_graphic_loader->loadText();
+    m_txt_port->setFont(m_font);
+    m_txt_port->setCharacterSize(35);
+    m_txt_port->setColor(GOM::EpiBlue);
+}
+
+unsigned short find_open_port()
+{
+    boost::asio::io_service io_service;
+    boost::asio::ip::tcp::acceptor acceptor(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 0));
+    auto port = acceptor.local_endpoint().port();
+    acceptor.close();
+    return port;
 }
 
 LobbyState::LobbyState(StateMachine &t_machine, GOM::IRenderWindow *t_window, std::size_t t_mode,
@@ -54,11 +67,21 @@ LobbyState::LobbyState(StateMachine &t_machine, GOM::IRenderWindow *t_window, st
                                    static_cast<float>(m_window->getSize().y - 100)},
                      GOM::Vector2f{64, 64}, t_graphic_loader, true)))
 {
+    m_btn_pressed = false;
+    is_running = true;
     m_size = t_size;
     m_mode = t_mode;
     initSprites();
     initText();
-    m_host = new Host(m_io_service, 5555);
+    unsigned short port = find_open_port();
+    std::cout << port << std::endl;
+    m_txt_port->setString(std::to_string(port));
+    m_txt_port->setPosition(
+        {static_cast<float>(m_window->getSize().x / 2) - (m_txt_port->getLocalBounds().width / 2), 300});
+    m_host = new Host(m_io_service, port);
+    m_host->setBoardSize(m_size);
+    m_host->setClientSymbol('O');
+    m_host->setHostSymbol('X');
 }
 
 LobbyState::~LobbyState()
@@ -67,39 +90,58 @@ LobbyState::~LobbyState()
 
 void LobbyState::update()
 {
-    for (auto event = GOM::Event{}; m_window->pollEvent(event);)
+    while (is_running)
     {
-        GOM::Vector2i mouse_pos = m_mouse->getMousePosition(m_window);
-        GOM::Vector2f mouse_pos_f{static_cast<float>(mouse_pos.x),
-                                  static_cast<float>(mouse_pos.y)};
-        if (event.type == GOM::EventType::MouseMoved)
+        for (auto event = GOM::Event{}; m_window->pollEvent(event);)
         {
-            m_home.is_hovered(mouse_pos_f);
-            m_start.is_hovered(mouse_pos_f);
-        }
-        if (m_mouse->isLeftMouseButtonPressed())
-        {
-            if (m_home.is_pressed(mouse_pos_f))
+            GOM::Vector2i mouse_pos = m_mouse->getMousePosition(m_window);
+            GOM::Vector2f mouse_pos_f{static_cast<float>(mouse_pos.x),
+                                      static_cast<float>(mouse_pos.y)};
+            if (event.type == GOM::EventType::MouseMoved)
             {
-                std::cout << "local btn pressed" << std::endl;
-                m_next = StateMachine::build<MainState>(
-                    m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
+                m_home.is_hovered(mouse_pos_f);
+                m_start.is_hovered(mouse_pos_f);
             }
-            if (m_start.is_pressed(mouse_pos_f) && m_host->is_connected())
+            if (m_mouse->isLeftMouseButtonPressed())
             {
-                std::cout << "start btn pressed" << std::endl;
-                // m_next = StateMachine::build<GameStateMulti>(
-                //     m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true, m_host);
+                if (m_home.is_pressed(mouse_pos_f))
+                {
+                    std::cout << "local btn pressed" << std::endl;
+                    is_running = false;
+                    m_next = StateMachine::build<MainState>(
+                        m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true);
+                }
+                if (m_start.is_pressed(mouse_pos_f) && m_host->getGameStarted() && !m_btn_pressed)
+                {
+                    m_btn_pressed = true;
+                    m_host->send_game_setup(1, 'X', 'O', m_size);
+                    std::cout << "start btn pressed" << std::endl;
+                    is_running = false;
+                    m_next = StateMachine::build<GameStateMulti>(
+                        m_state_machine, m_window, m_mode, m_graphic_loader, m_size, true, m_host);
+                }
+            }
+            switch (event.type)
+            {
+            case GOM::EventType::Closed:
+                is_running = false;
+                m_state_machine.quit();
+                break;
+            case GOM::EventType::KeyPressed:
+                switch (event.key)
+                {
+                case GOM::EventKey::Enter:
+                    std::cout << "pressed enter\n";
+                    m_host->send_message("test from host");
+                default:
+                    break;
+                }
+                break;
+            default:
+                break;
             }
         }
-        switch (event.type)
-        {
-        case GOM::EventType::Closed:
-            m_state_machine.quit();
-            break;
-        default:
-            break;
-        }
+        draw();
     }
 }
 
@@ -108,8 +150,9 @@ void LobbyState::draw()
     m_window->clear();
     m_window->draw(m_bg_s);
     m_window->draw(m_title);
+    m_window->draw(m_txt_port);
     m_window->draw(m_home.getSprite());
-    if (m_host->is_connected())
+    if (m_host->isReady())
         m_window->draw(m_start.getSprite());
     m_window->display();
 }
