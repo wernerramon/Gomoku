@@ -4,6 +4,7 @@ Client::Client(boost::asio::io_service &io_service, const std::string &host, uns
     : io_service_(io_service), socket_(io_service), host_(host), port_(port),
       board_size_(15), current_player_(1), connected(false), start_game(false)
 {
+  game_started_ = false;
   board_.resize(board_size_, std::vector<int>(board_size_, 0));
   start_connect();
   m_thread = boost::thread([&io_service]()

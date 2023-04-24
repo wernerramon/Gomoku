@@ -4,6 +4,7 @@ Host::Host(boost::asio::io_service &io_service, unsigned short port)
     : acceptor_(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
       socket_(io_service), board_size_(15), current_player_(1)
 {
+  game_started_ = false;
   board_.resize(board_size_, std::vector<int>(board_size_, 0));
   start_accept();
   m_thread = boost::thread([&io_service]()
